@@ -19,17 +19,10 @@ window.onload = async () => {
 
             if (response.ok) {
             
-                //const { user } = await response.json();
                 User = await response.json();
 
                 document.getElementById('userID').innerHTML = User.user.name;
                 
-                //const username = document.createElement('p');
-                //username.innerText = user.name;
-                
-                //displayuser.appendChild(username);
-                console.log("User 1:");
-
             } else {
                 const {msg} = await response.json();
                 throw new Error(msg);
@@ -39,7 +32,7 @@ window.onload = async () => {
             alert('Benutzername konnte nicht ermittelt werden ' + err?.message || 'Unbekannter Fehler');
         }
     }
-    console.log("User 2:"); 
+
     console.log("User: ", User.user.name + " " + User.user.id);
     
     const dbevents = await getEventsfromDB();
