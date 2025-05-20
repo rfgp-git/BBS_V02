@@ -1,0 +1,25 @@
+{
+  "name": "bowling-booking-system",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "author": "Peter Tyrach",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-session": "^2.1.0",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "keygrip": "^1.1.0",
+    "lodash": "^4.17.21",
+    "mongoose": "^8.14.0",
+    "nodemon": "^3.1.9",
+    "passport": "^0.5.3",
+    "passport-local": "^1.0.0",
+    "uuid": "^11.1.0"
+  },
+  "type": "module"
+}

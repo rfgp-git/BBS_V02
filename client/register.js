@@ -1,0 +1,66 @@
+
+const regformdiv =document.getElementById('bbs-register-form');
+const errMsgDiv = document.getElementById('error-message');
+
+regformdiv.addEventListener('click', () => {
+    errMsgDiv.innerHTML='';
+}),
+
+regformdiv.addEventListener('submit', async(event) => {
+        
+    event.preventDefault();
+
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    if (!username || !email || !password) {
+        errMsgDiv.innerHTML = 'Alle Felder müssen ausgefüllt sein';
+        return;
+    }
+
+    try {
+        //const response = await fetch('http://localhost:3000/api/register', {
+            const response = await fetch('api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username,
+                email,
+                password
+            })
+        });
+
+        if (response.ok) {
+
+            const { record } = await response.json();
+            
+            document.querySelector('.bbs-form h2').style.display = 'none';
+            document.querySelector('.bbs-form p').style.display = 'none';
+
+            const form = document.getElementById('bbs-register-form');
+
+            form.style.text = 'center';
+
+            
+            form.innerHTML = 'Willkommen beim Bowling Booking System <br>' +
+                              'Die Registrierung war erfogreich für den Benuzer ' +  '<br><center><b>' +  record.username + '</b></center>' +
+                              '<br> Es wird jetzt die Login Seite aufgeblendet';
+
+            setTimeout( () => {
+                window.location.href = 'index.html?username=' + encodeURIComponent(record.username);
+            },5000);
+
+        } else {
+            const { errors } = await response.json();
+            let testerr=errors[0].msg;
+            
+            throw new Error(testerr);
+        }
+    } catch (err) {
+        console.log('error: ', err);
+        errMsgDiv.innerHTML = 'Fehler beim Registrieren ' + err.message ? err.message: 'Unbekannter Fehler';
+    }
+});

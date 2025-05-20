@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bowling Booking System</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1>Das Schnaittacher Kegelbahn BBS</h1>
+
+    <div class="bbs-form" id="bbs-register-form">
+        <h2>Registrierung</h2>
+        <form>
+            <label for="username">Benutzername</label>
+            <input type="username" id="username" placeholder="Benutzername">
+
+            <label for="email">E-Mail</label>
+            <input type="email" id="email" placeholder="E-Mail">
+
+            <label for="password">Passwort</label>
+            <input type="password" id="password" placeholder="Passwort">
+
+            <div id="error-message"></div>
+
+            <button type="submit" class="form-button">Registrieren</button>
+
+            <p class="form-toggle">
+                Bereits registriert ?
+                <a href="./index.html">
+                    Startseite
+                </a>
+            </p>
+           
+            <script src="./register.js"></script>
+      
+        </form>
+    </div>
+</body>
+</html>
