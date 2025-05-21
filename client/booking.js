@@ -2,6 +2,7 @@ let User= {};
 let calendar;
 
 window.onload = async () => {
+    
     if (!sessionStorage.getItem('isAuthenticated')) {
         alert('Zugriff verweigert');
         window.location.href = 'index.html';
@@ -34,6 +35,8 @@ window.onload = async () => {
     }
 
     console.log("User: ", User.user.name + " " + User.user.id);
+
+    
     
     const dbevents = await getEventsfromDB();
 

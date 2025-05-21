@@ -3,6 +3,9 @@ import User from '../models/user.js';
 import Event from '../models/event.js';
 import passport from 'passport';
 import DB from '../lib/db.js';
+import Holidays from 'date-holidays';
+
+
 
 
 
@@ -292,6 +295,36 @@ _.get('/getEvents' ,async (req, res) => {
         res.status(500).json({
             timestamp: Date.now(),
             msg: 'Failed to get events, internal server error',
+            code: 500
+        });
+    }
+});
+
+_.get('/getHolidays' ,async (req, res) => {
+
+    let publicholidays=[];
+
+    try {
+        let holidays = new Holidays('DE', 'BY');
+        let holidaysinBavaria = holidays.getHolidays(req.body.year);
+
+        for (let i =0;i < holidaysinBavaria.length; i++) {
+            if (holidaysinBavaria[i].type === 'public') {
+                let event = new Event();
+                event.setTitle(holidaysinBavaria[i].name);
+                event.setStartPoint(holidaysinBavaria[i].start);
+                event.setEndPoint(holidaysinBavaria[i].end);
+                publicholidays.push(event);
+            }
+        }
+
+        res.status(200).json({publicholidays});
+
+    } catch (err) {
+        console.error(new Error(err.message));
+        res.status(500).json({
+            timestamp: Date.now(),
+            msg: 'Failed to get holidays, internal server error',
             code: 500
         });
     }
