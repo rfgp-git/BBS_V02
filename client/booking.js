@@ -1,5 +1,8 @@
 let User= {};
 let calendar;
+let aholidays = [];
+let startyear;
+let endyear;
 
 window.onload = async () => {
     
@@ -36,8 +39,24 @@ window.onload = async () => {
 
     console.log("User: ", User.user.name + " " + User.user.id);
 
+    // get publich holidays
+    const currentYear = new Date().getFullYear();
+    const pholidays = await getpublicHolidays(startyear, endyear); 
     
-    
+    for (let i = 0; i < pholidays.publicholidays.length; i++) {
+        pholidays.publicholidays[i].overlap   = false,
+        pholidays.publicholidays[i].editable  = false,
+        pholidays.publicholidays[i].draggable = false,
+        pholidays.publicholidays[i].allow     = false,
+        pholidays.publicholidays[i].display   = 'background'
+        pholidays.publicholidays[i].color     = '#ff9f89';
+
+        aholidays.push(pholidays.publicholidays[i].start);
+        
+        calendar.addEvent(pholidays.publicholidays[i]);
+    }
+        
+    // get events from the database
     const dbevents = await getEventsfromDB();
 
     for (let i = 0; i < dbevents.events.length; i++) {
@@ -53,50 +72,51 @@ window.onload = async () => {
         
         calendar.addEvent(dbevents.events[i]);
     }
+
+    // toolbar actions
+    const series_btn = document.getElementById("icon-series");
+
+    series_btn.addEventListener("click", event => {
+    alert("Series events to be implemented"); 
+    });
+
+    const help_btn = document.getElementById("icon-help");
+
+    help_btn.addEventListener("click", event => {
+    alert("Help text to be implemented"); 
+    });
+
+    const profile_btn = document.getElementById("icon-profile");
+
+    profile_btn.addEventListener("click", event => {
+        window.location.href = "./profile.html";
+    });
+
+    const logout_btn = document.getElementById("icon-logout");
+
+    logout_btn.addEventListener("click", async (event) => {
+        try {
+            const response = await fetch('api/logout', {
+                method: 'POST',
+                headers: {
+                    'Contetnt-Type': '/application/json'
+                },
+                credentials: 'include'
+            });
+
+        } catch(err) {
+            alert('Logout ist fehlgeschlagen ' + err?.message || 'Unbekannter Fehler');
+            window.location.href = 'index.html';
+        }
+            window.location.href = "./index.html";
+    });
 }
-
-const series_btn = document.getElementById("icon-series");
-
-series_btn.addEventListener("click", event => {
-   alert("Series events to be implemented"); 
-});
-
-const help_btn = document.getElementById("icon-help");
-
-help_btn.addEventListener("click", event => {
-   alert("Help text to be implemented"); 
-});
-
-const profile_btn = document.getElementById("icon-profile");
-
-profile_btn.addEventListener("click", event => {
-    window.location.href = "./profile.html";
-});
-
-const logout_btn = document.getElementById("icon-logout");
-
-logout_btn.addEventListener("click", async (event) => {
-    //call logout
-    //alert("logout clicked");
-    try {
-        const response = await fetch('api/logout', {
-            method: 'POST',
-            headers: {
-                'Contetnt-Type': '/application/json'
-            },
-            credentials: 'include'
-        });
-
-    } catch(err) {
-        alert('Logout ist fehlgeschlagen ' + err?.message || 'Unbekannter Fehler');
-        window.location.href = 'index.html';
-    }
-        window.location.href = "./index.html";
-});
 
 document.addEventListener('DOMContentLoaded', async function() {
 
-    let holiday = ['2025-05-01'];
+    let currentyear = new Date().getFullYear();
+    startyear = currentyear -1 ;
+    endyear= currentyear + 2;
 
     const calendarEl = document.getElementById('calendar')
     calendar = new FullCalendar.Calendar(calendarEl, {
@@ -112,9 +132,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             day: 'Tag',
             listMonth: 'Liste',
         },
+        validRange: {
+            start: startyear + '-01-01', // Start range 2024-0-01
+            end: endyear + '-01-01'   // End of the range (exclusive) 2027-01-01
+        },
         hiddenDays: [0],
         locale: 'DE',
-        timeZone: 'Europe/London',
+        timeZone: 'Europe/Berlin',
         initialDate: new Date(),
         navLinks: true, // can click day/week names to navigate views
         selectable: true,
@@ -122,14 +146,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         select: async function(arg) {
             console.log('call select start ', arg.startStr);
             console.log('call select end ', arg.endStr);
-            console.log('call select 2', holiday[0]);
-            let position = arg.startStr.search(holiday[0]);
-            if ( position != -1) {
-                //if (arg.startStr===holiday[0]) {
-                console.log('call unselect');
+
+            // get day without time
+            let day = [];
+            if (arg.startStr.indexOf("T") !== -1) {
+                day = arg.startStr.split("T");  
+            } else {
+                day.push(arg.startStr); 
+            }
+
+            // check if day is holiday to disable select
+            if (isHoliday(day[0])) {
                 calendar.unselect();
                 arg.jsEvent.stopPropagation();
-                return false;  
+                return false; 
             }
     
             var title = prompt('Reservierung für:');
@@ -170,6 +200,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     },
     editable: true,
     dayMaxEvents: true, // allow "more" link when too many events
+    /*
     events: [
         // red areas where no events can be dropped
         {
@@ -181,7 +212,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             display: 'background',
             color: '#ff9f89',
         },
-    ]
+    ]*/
     });
 
     calendar.render();
@@ -310,3 +341,46 @@ async function getEventsfromDB() {
     }
 }
 
+async function getpublicHolidays(startyear, endyear) {
+    let pholidays=[];
+    try {
+        //const response = await fetch('http://localhost:3000/api/register', {
+        const response = await fetch('api/getHolidays', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify( {
+                startyear,
+                endyear
+            } )
+        });
+
+        if (response.ok) {
+            
+        pholidays = await response.json();
+        return pholidays;
+
+        } else {
+            if (!response.ok) {
+                const { errors } = await response.json();
+                let testerr=errors[0].msg;
+                throw new Error(testerr);
+            }
+        }
+    } catch (err) {
+        console.log('error: ', err);
+        alert ('Fehler beim beim Ermiiteln der öffentlichen Feiertage ' + err.message ? err.message: 'Unbekannter Fehler');
+    }
+}
+
+function isHoliday(day) {
+    let result = false;
+    for (let i= 0; i<aholidays.length;i++) {
+        if (day === aholidays[i]) {
+            result = true;
+        }
+    }
+    return result;
+
+}

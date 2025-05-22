@@ -300,21 +300,29 @@ _.get('/getEvents' ,async (req, res) => {
     }
 });
 
-_.get('/getHolidays' ,async (req, res) => {
+_.post('/getHolidays' ,async (req, res) => {
 
     let publicholidays=[];
+    let holidaysinBavaria=[];
 
     try {
         let holidays = new Holidays('DE', 'BY');
-        let holidaysinBavaria = holidays.getHolidays(req.body.year);
+
+        for (let i =req.body.startyear;i < req.body.endyear; i++) {
+            let hd = holidays.getHolidays(i);
+            holidaysinBavaria.push(hd);
+        }
 
         for (let i =0;i < holidaysinBavaria.length; i++) {
-            if (holidaysinBavaria[i].type === 'public') {
-                let event = new Event();
-                event.setTitle(holidaysinBavaria[i].name);
-                event.setStartPoint(holidaysinBavaria[i].start);
-                event.setEndPoint(holidaysinBavaria[i].end);
-                publicholidays.push(event);
+            for (let j =0;j < holidaysinBavaria[i].length; j++) {
+                if (holidaysinBavaria[i][j].type === 'public') {
+                    let event = new Event();
+                    let pdate = holidaysinBavaria[i][j].date.split(" ");
+                    event.setTitle(holidaysinBavaria[i][j].name);
+                    event.setStartPoint(pdate[0]);
+                    event.setEndPoint(pdate[0]);
+                    publicholidays.push(event);
+                }
             }
         }
 
