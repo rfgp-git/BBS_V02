@@ -8,6 +8,8 @@ import DB from './lib/db.js';
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import 'dotenv/config'
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Configure the express server
 const app = express();
@@ -52,6 +54,10 @@ _.start = () => {
     }
 
 }
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+console.log("dirname: ", __dirname);
 
 // create cookie
 app.use(cookieSession({
