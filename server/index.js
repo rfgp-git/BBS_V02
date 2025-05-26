@@ -7,6 +7,7 @@ import Keygrip from 'keygrip';
 import DB from './lib/db.js';
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
+import 'dotenv/config'
 
 // Configure the express server
 const app = express();
@@ -28,9 +29,14 @@ _.start = () => {
     }
 
     try {
+        //const apiKey = process.env.API_KEY;
+        const apiKey = process.env.DB_CONNECT_KEY;
+        console.log("Your API Key is:", apiKey);
         //mongoose.connect('mongodb://localhost:27017/testdb');
         //mongoose.connect('mongodb+srv://petertyrach:<u5mwg5Pk3Q4pKch>@cluster0.mehevcm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/testdb');
-        mongoose.connect('mongodb+srv://petertyrach:u5mwg5Pk3Q4pKchy@cluster0.mehevcm.mongodb.net/testdb');
+        const dbconnectstring= 'mongodb+srv://' + apiKey + '@cluster0.mehevcm.mongodb.net/testdb';
+        //mongoose.connect('mongodb+srv://petertyrach:u5mwg5Pk3Q4pKchy@cluster0.mehevcm.mongodb.net/testdb');
+        mongoose.connect(dbconnectstring);
         const db = mongoose.connection;
 
         db.on('error', err => {
