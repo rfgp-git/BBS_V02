@@ -192,13 +192,17 @@ document.addEventListener('DOMContentLoaded', async function() {
             const dbeventid= await updateEventinDB(updatedEvent._def.extendedProps._id, updatedEvent.title, updatedEvent.startStr, updatedEvent.endStr );
         },
         eventClick: async function(arg) {
-        if (User.user.id === arg.event._def.extendedProps.userid) {
-            if (confirm('Soll die Reservierung gelöscht werden ?')) {
-                await removeEventfromDB(arg.event._def.extendedProps._id);
-                arg.event.remove()
+            if (User.user.id === arg.event._def.extendedProps.userid) {
+                if (confirm('Soll die Reservierung gelöscht werden ?')) {
+                    await removeEventfromDB(arg.event._def.extendedProps._id);
+                    arg.event.remove()
+                }
             }
-        }
-    },
+        },
+        touchstart: async function(arg) {
+            alert ("Touch:", arg)
+        },
+
     editable: true,
     dayMaxEvents: true, // allow "more" link when too many events
     /*
@@ -215,6 +219,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         },
     ]*/
     });
+
+    calendar.addEventListener('touchstart', function (e) {
+            console.log('Touch started on calendar!', e);
+        });
 
     calendar.render();
 
