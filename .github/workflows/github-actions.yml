@@ -1,16 +1,19 @@
-name: Greetings
+name: Environment Variables
 
-on: [pull_request_target, issues]
+on: 
+  push:
+    branches: [ main ]
+env: 
+  APP_NAME: BBS
 
 jobs:
-  greeting:
+  job1:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
+    
     steps:
-    - uses: actions/first-interaction@v1
-      with:
-        repo-token: ${{ secrets.DB_CONNECT_KEY }}
-        issue-message: "Message that will be displayed on users' first issue"
-        pr-message: "Message that will be displayed on users' first pull request"
+    - name : BBS
+      run: echo "Hello $APP_NAME"
+    - name : Access secret keys
+      run: echo ${{ secrets.DB_CONNECT_KEY }}
+    
+    
