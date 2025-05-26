@@ -29,8 +29,8 @@ _.start = () => {
     }
 
     try {
-        const apiKey = process.env.API_KEY;
-        //const apiKey = process.env.DB_CONNECT_KEY; Secrets from github
+        //const apiKey = process.env.API_KEY;
+        const apiKey = process.env.DB_CONNECT_KEY; //Secrets from github
         console.log("Your API Key is:", apiKey);
         //mongoose.connect('mongodb://localhost:27017/testdb');
         //mongoose.connect('mongodb+srv://petertyrach:<u5mwg5Pk3Q4pKch>@cluster0.mehevcm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/testdb');
