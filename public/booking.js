@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     calendar.render();
 
-    calendar.addEventListener('touchstart', function (e) {
+    calendarEl.addEventListener('touchstart', function (e) {
     console.log('Touchstart detected on the calendar!');
   });
 
