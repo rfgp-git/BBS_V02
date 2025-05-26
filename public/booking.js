@@ -220,10 +220,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     ]*/
     });
 
-    calendar.addEventListener('touchstart', function (e) {
-            console.log('Touch started on calendar!', e);
-        });
-
     calendar.render();
 
 });
