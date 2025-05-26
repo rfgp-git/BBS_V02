@@ -142,6 +142,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         initialDate: new Date(),
         navLinks: true, // can click day/week names to navigate views
         selectable: true,
+        droppable: true,
         selectMirror: true,
         select: async function(arg) {
             console.log('call select start ', arg.startStr);
