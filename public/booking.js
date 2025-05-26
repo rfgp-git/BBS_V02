@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     const calendarEl = document.getElementById('calendar')
     calendar = new FullCalendar.Calendar(calendarEl, {
+        plugins: ['interaction'],
         headerToolbar: {
         left: 'prev,next today',
         center: 'title',
@@ -199,10 +200,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         },
-        touchstart: async function(arg) {
-            alert ("Touch:", arg)
-        },
-
+        
     editable: true,
     dayMaxEvents: true, // allow "more" link when too many events
     /*
