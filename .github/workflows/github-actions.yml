@@ -15,5 +15,7 @@ jobs:
       run: echo "Hello $APP_NAME"
     - name : Access secret keys
       run: echo ${{ secrets.DB_CONNECT_KEY }}
+      env:
+        DB_CONNECT_KEY: ${{ secrets.DB_CONNECT_KEY }}
     
     
