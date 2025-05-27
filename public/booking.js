@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         },
-    longPressDelay:0,
+    longPressDelay:1000,
     editable: true,
     dayMaxEvents: true, // allow "more" link when too many events
     /*
