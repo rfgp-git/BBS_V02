@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         },
-        
+    longPressDelay:0,
     editable: true,
     dayMaxEvents: true, // allow "more" link when too many events
     /*
@@ -219,9 +219,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     calendar.render();
 
-    calendarEl.addEventListener('touchstart', function (e) {
-    console.log('Touchstart detected on the calendar!');
-  });
+   // calendarEl.addEventListener('touchstart', function (e) {
+    //console.log('Touchstart detected on the calendar!');
+  //});
 
 });
 
