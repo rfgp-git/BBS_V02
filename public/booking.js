@@ -136,6 +136,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             start: startyear + '-01-01', // Start range 2024-0-01
             end: endyear + '-01-01'   // End of the range (exclusive) 2027-01-01
         },
+        longPressDelay:0,
         hiddenDays: [0],
         locale: 'DE',
         timeZone: 'Europe/Berlin',
@@ -199,7 +200,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
         },
-    longPressDelay:1000,
     editable: true,
     dayMaxEvents: true, // allow "more" link when too many events
     /*
