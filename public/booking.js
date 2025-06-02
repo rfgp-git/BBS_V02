@@ -336,17 +336,6 @@ async function submitEvent(event) {
             existingEvent.event.setProp('title', title);
             existingEvent.event.setStart(eventstart);
             existingEvent.event.setEnd(eventend);
-            
-            //existingEvent.event.startStr = eventstart;
-            //existingEvent.event.endStr = eventend;
-            /*
-            let startDate= new Date(eventstart);
-            let endDate= new Date(eventend);
-            existingEvent.event.setStart(startDate);
-            existingEvent.event.setEnd(endDate);
-            //calendar.updateEvent('updateEvent',existingEvent);
-            calendar.refetchEvents();
-            */
         }
     } catch (err) {
         alert('Fehler beim Anlegen oder beim Aktualisieren der Reservierung' + err?.message || 'Unbekannter Fehler');
