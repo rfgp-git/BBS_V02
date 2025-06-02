@@ -1,8 +1,17 @@
-let User= {};
+let User = {};
 let calendar;
 let aholidays = [];
 let startyear;
 let endyear;
+let processingMode;
+let existingEvent = {};
+
+const MODE = {
+    VIEW: 1,
+    UPDATE: 2,
+    CREATE: 3
+}
+
 
 window.onload = async () => {
     
@@ -38,6 +47,7 @@ window.onload = async () => {
     }
 
     console.log("User: ", User.user.name + " " + User.user.id);
+    processingMode=MODE.VIEW;
 
     // get publich holidays
     const currentYear = new Date().getFullYear();
@@ -75,25 +85,21 @@ window.onload = async () => {
 
     // toolbar actions
     const series_btn = document.getElementById("icon-series");
-
     series_btn.addEventListener("click", event => {
-    alert("Series events to be implemented"); 
+        alert("Series events to be implemented"); 
     });
 
     const help_btn = document.getElementById("icon-help");
-
     help_btn.addEventListener("click", event => {
-    alert("Help text to be implemented"); 
+        alert("Help text to be implemented"); 
     });
 
     const profile_btn = document.getElementById("icon-profile");
-
     profile_btn.addEventListener("click", event => {
         window.location.href = "./profile.html";
     });
 
     const logout_btn = document.getElementById("icon-logout");
-
     logout_btn.addEventListener("click", async (event) => {
         try {
             const response = await fetch('api/logout', {
@@ -110,6 +116,24 @@ window.onload = async () => {
         }
             window.location.href = "./index.html";
     });
+
+    // buttons of modal dialog
+    const cancel_btn = document.getElementById("cancelButton");
+    cancel_btn.addEventListener("click", event => {
+        closeModalDialog();     
+    });
+
+    const submit_btn = document.getElementById("submitButton");
+    submit_btn.addEventListener("click", event => {
+        submitEvent(event);     
+    });
+
+    const delete_btn = document.getElementById("deleteButton");
+    delete_btn.addEventListener("click", event => {
+        deleteEvent(event);     
+    });
+    
+
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -123,7 +147,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         headerToolbar: {
         left: 'prev,next today',
         center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+        right: 'timeGridWeek,timeGridDay,dayGridMonth,listMonth'
         },
         buttonText: {
             today: 'Heute',
@@ -140,96 +164,200 @@ document.addEventListener('DOMContentLoaded', async function() {
         hiddenDays: [0],
         locale: 'DE',
         timeZone: 'Europe/Berlin',
+        initialView: 'timeGridWeek',
         initialDate: new Date(),
         navLinks: true, // can click day/week names to navigate views
         selectable: true,
         droppable: true,
         selectMirror: true,
         select: async function(arg) {
-            console.log('call select start ', arg.startStr);
-            console.log('call select end ', arg.endStr);
-
-            // get day without time
-            let day = [];
-            if (arg.startStr.indexOf("T") !== -1) {
-                day = arg.startStr.split("T");  
-            } else {
-                day.push(arg.startStr); 
+            
+            // events can only be added in the weeks and day view
+            if (arg.view.type == 'dayGridMonth') {
+                calendar.unselect();
+                arg.jsEvent.stopPropagation();
+                return false;   
             }
+            
+            let startdaytime = [];
+            startdaytime = arg.startStr.split("T");
 
             // check if day is holiday to disable select
-            if (isHoliday(day[0])) {
+            if (isHoliday(startdaytime[0])) {
                 calendar.unselect();
                 arg.jsEvent.stopPropagation();
                 return false; 
             }
-    
-            var title = prompt('Reservierung für:');
-           
-            if (title) {
-                 title = User.user.name + ": " + title;
-                const dbeventid= await saveEventtoDB(User.user.id, title, arg.startStr, arg.endStr );
-                console.log('title: ', title );
-                
-                const bbsevent= calendar.addEvent({
-                    title: title,
-                    start: arg.startStr,
-                    end: arg.endStr,
-                    allDay: arg.allDay,
-                    color: '#00ff00',
-                    extendedProps: {
-                        userid: User.user.id,
-                        _id: dbeventid
-                    }
-                })
-            }
-            calendar.unselect()
+
+            // open modal dialog
+            processingMode = MODE.CREATE;
+            openModalDialog(arg);
+
+            //calendar.unselect();
         },
-        eventChange: async function (info) {
+        /*
+            eventChange: async function (info) {
             let updatedEvent = info.event;
             console.log("eventChanged: ", updatedEvent.startStr);
             console.log("eventChanged: ", updatedEvent.endStr);
             //updatedEvent.setProp('color','#6080D3');
             const dbeventid= await updateEventinDB(updatedEvent._def.extendedProps._id, updatedEvent.title, updatedEvent.startStr, updatedEvent.endStr );
         },
+        */
         eventClick: async function(arg) {
+
             if (User.user.id === arg.event._def.extendedProps.userid) {
-                if (confirm('Soll die Reservierung gelöscht werden ?')) {
-                    await removeEventfromDB(arg.event._def.extendedProps._id);
-                    arg.event.remove()
-                }
+                // update existing event
+                existingEvent = arg;
+                processingMode = MODE.UPDATE;
+                openModalDialog(arg);
             }
-        },
+          },
     editable: true,
     dayMaxEvents: true, // allow "more" link when too many events
-    /*
-    events: [
-        // red areas where no events can be dropped
-        {
-            start: holiday[0],
-            end: '2025-05-01',
-            overlap: false,
-            editable: false,
-            draggable: false,
-            display: 'background',
-            color: '#ff9f89',
-        },
-    ]*/
+    
     });
 
     calendar.render();
 
-   // calendarEl.addEventListener('touchstart', function (e) {
-    //console.log('Touchstart detected on the calendar!');
-  //});
-
 });
+
+function openModalDialog(event) {
+
+    const mDialog = document.getElementById("eventModal");
+    let startdaytime = [];
+    let enddaytime = [];
+    
+    
+    if (processingMode == MODE.CREATE) {
+
+        document.getElementById("modalTitle").textContent="Reservierung anlegen";
+        document.getElementById("submitButton").value="Anlegen";
+        document.getElementById("deleteButton").style.display = 'none';
+        
+        startdaytime = event.startStr.split("T");
+        document.getElementById("eventDate").value = startdaytime[0];
+        document.getElementById("eventStart").value = startdaytime[1];
+
+        // only full hours are allowed
+        const startHour    = startdaytime[1].split(":");
+        const startMinutes = startHour[1];
+
+        // increment by 1
+        const ihour = Number(startHour[0]) + 1;
+        
+        // set end time with leading zero
+        document.getElementById("eventEnd").value = ihour.toString().padStart(2,"0") + ":" + startMinutes;
+    }
+
+    if (processingMode == MODE.UPDATE) {
+        document.getElementById("modalTitle").textContent="Reservierung aktualisieren/löschen";
+        document.getElementById("submitButton").value="Aktualisieren";
+        
+        console.log("Title: ", event.event._def.title );
+        
+        let title = event.event._def.title.split(": ");
+        
+        startdaytime = event.event.startStr.split("T");
+        enddaytime = event.event.endStr.split("T");
+        
+        document.getElementById("eventTitle").value = title[1];
+        document.getElementById("eventDate").value = startdaytime[0];
+        document.getElementById("eventStart").value = startdaytime[1];
+        document.getElementById("eventEnd").value = enddaytime[1];
+        
+    }
+
+    // Open modal dialog
+    mDialog.style.display = 'block';
+    //mDialog.fadeIn(200);
+    document.getElementById("eventTitle").focus();
+    
+}
+
+function closeModalDialog() {
+    const mDialog = document.getElementById("eventModal");
+    mDialog.style.display = "none";
+    /*    
+    $("#eventModal").fadeOut(200);
+    $("#errors").text("");
+    $("#calendar").removeClass("opaque");
+    this.mode = MODE.VIEW;
+    */
+}
+
+async function deleteEvent(event) {
+    console.log("delete: ", event);
+    await removeEventfromDB(existingEvent.event._def.extendedProps._id);
+    existingEvent.event.remove();
+    closeModalDialog();
+}
+
+async function submitEvent(event) {
+    console.log("submit");
+    event.preventDefault();
+    
+    const form=document.getElementById("eventModal");
+    
+    if (form.checkValidity()) {
+        form.submit();
+    } else {
+        alert("Bitte eine Reservierungs-Bezeichnug eingeben");
+        return;
+    }
+
+    console.log("Bezeichnung: ", document.getElementById("eventTitle").value);
+
+    
+
+    const title = User.user.name + ": " + document.getElementById("eventTitle").value;
+    const eventstart = document.getElementById("eventDate").value + "T" + document.getElementById("eventStart").value;
+    const eventend = document.getElementById("eventDate").value + "T" + document.getElementById("eventEnd").value;
+
+    try {
+        if (processingMode == MODE.CREATE) {
+            const dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend );
+            
+            calendar.addEvent({
+                title: title,
+                start: eventstart,
+                end: eventend,
+                allDay: event.allDay,
+                color: '#5BC26D',
+                extendedProps: {
+                    userid: User.user.id,
+                    _id: dbeventid
+                }
+            });
+        }
+
+        if (processingMode == MODE.UPDATE) {
+            const dbeventid= await updateEventinDB(existingEvent.event._def.extendedProps._id, title, eventstart, eventend );
+            existingEvent.event.setProp('title', title);
+            existingEvent.event.setStart(eventstart);
+            existingEvent.event.setEnd(eventend);
+            
+            //existingEvent.event.startStr = eventstart;
+            //existingEvent.event.endStr = eventend;
+            /*
+            let startDate= new Date(eventstart);
+            let endDate= new Date(eventend);
+            existingEvent.event.setStart(startDate);
+            existingEvent.event.setEnd(endDate);
+            //calendar.updateEvent('updateEvent',existingEvent);
+            calendar.refetchEvents();
+            */
+        }
+    } catch (err) {
+        alert('Fehler beim Anlegen oder beim Aktualisieren der Reservierung' + err?.message || 'Unbekannter Fehler');
+    }
+}
 
 async function saveEventtoDB(userid, title, start, end) {
     console.log("saveEventtoDB: <" + userid + "> <" + title + "> <" + start + "> <" + end +">" );
 
     try {
-        //const response = await fetch('http://localhost:3000/api/register', {
+        //const response = await fetch('http://localhost:3000/api/saveEvent', {
         const response = await fetch('api/saveEvent', {
             method: 'POST',
             headers: {
@@ -290,6 +418,7 @@ async function updateEventinDB(eventid, title, start, end) {
         alert ('Fehler beim Updaten des Events ' + err.message ? err.message: 'Unbekannter Fehler');
     }
 }
+
 
 async function removeEventfromDB(eventid) {
     console.log("removeEventfromDB: <" + eventid + ">");

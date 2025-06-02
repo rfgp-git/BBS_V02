@@ -144,7 +144,8 @@ _.post('/logout', async (req,res) => {
     }
 });
 
-_.get('/user', reqireAuth ,async (req, res) => {
+//_.get('/user', reqireAuth ,async (req, res) => { cookie to be done
+_.get('/user', async (req, res) => {
 
     try {
         console.group('\n GET /user - request details:');
