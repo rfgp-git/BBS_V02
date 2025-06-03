@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             start: startyear + '-01-01', // Start range 2024-0-01
             end: endyear + '-01-01'   // End of the range (exclusive) 2027-01-01
         },
-        longPressDelay:1000,
+        //longPressDelay:1000,
         hiddenDays: [0],
         locale: 'DE',
         timeZone: 'Europe/Berlin',
@@ -168,8 +168,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         initialDate: new Date(),
         navLinks: true, // can click day/week names to navigate views
         selectable: true,
-        droppable: true,
-        selectMirror: true,
+        //droppable: true,
+        //selectMirror: true,
         select: async function(arg) {
             
             // events can only be added in the weeks and day view
