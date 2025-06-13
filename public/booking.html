@@ -25,6 +25,9 @@
       <div class="tab-add-series">
         <i id="icon-series" class="fa-solid fa-plus"></i>
       </div>
+      <div class="tab-remove">
+        <i id="icon-remove" class="fa-solid fa-trash-can"></i>
+      </div>
       <div class="tab-profile">
         <i id = "icon-profile" class="fa-solid fa-user"></i>
       </div>
@@ -51,6 +54,16 @@
           <div>
               <input required type="time" id="eventStart" name="time" class="shortInput"></input>
               ‒<input required type="time" id="eventEnd" name="time" class="shortInput"></input>
+          </div>
+
+          <label class="descriptor" for="series">Serie</label>
+
+          <div>
+              <select id="seriesSelect">
+                <option value="once">Einmalig</option>
+                <option value="weekly">Wöchentlich</option>
+                <option value="twoweeks">Alle 2 Wochen</option>
+              </select>
           </div>
           
           <div id="eventControls">

@@ -5,6 +5,7 @@ let startyear;
 let endyear;
 let processingMode;
 let existingEvent = {};
+let dbevents = [];
 
 const MODE = {
     VIEW: 1,
@@ -67,11 +68,12 @@ window.onload = async () => {
     }
         
     // get events from the database
-    const dbevents = await getEventsfromDB();
+    dbevents = await getEventsfromDB();
 
     for (let i = 0; i < dbevents.events.length; i++) {
         if (User.user.id === dbevents.events[i].userid ) {
-            dbevents.events[i].color='#00ff00';
+            //dbevents.events[i].color='#00ff00';
+            dbevents.events[i].color='#4E95D9';
         } else {
             dbevents.events[i].overlap   = false,
             dbevents.events[i].editable  = false,
@@ -92,6 +94,18 @@ window.onload = async () => {
     const help_btn = document.getElementById("icon-help");
     help_btn.addEventListener("click", event => {
         alert("Help text to be implemented"); 
+    });
+
+    const remove_btn = document.getElementById("icon-remove");
+    remove_btn.addEventListener("click", async event => {
+         if (confirm('Sollen alle Reservierung gelöscht werden ?')) {
+            for (let i = 0; i < dbevents.events.length; i++) {
+                if (User.user.id === dbevents.events[i].userid ) {
+                    await removeEventfromDB(dbevents.events[i]._id);
+                } 
+            }
+            location.reload();
+        }
     });
 
     const profile_btn = document.getElementById("icon-profile");
@@ -323,7 +337,8 @@ async function submitEvent(event) {
                 start: eventstart,
                 end: eventend,
                 allDay: event.allDay,
-                color: '#5BC26D',
+                //color: '#5BC26D',
+                color: '#4E95D9',
                 extendedProps: {
                     userid: User.user.id,
                     _id: dbeventid
