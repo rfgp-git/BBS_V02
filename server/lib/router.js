@@ -15,6 +15,7 @@ import {UserValidationSchema} from '../utils/validationSchemas.js';
 
 
 let _ = express.Router();
+let groupmap = new Map();
 
 const reqireAuth = (req, res, next) => {
     console.log('\n router.requireAuth reqire auth middleware ...');
@@ -195,7 +196,13 @@ _.post('/saveEvent',  async (req,res) => {
             event.setStartPoint(req.body.start);
             event.setEndPoint(req.body.end);
             event.setUserID(req.body.userid);
-                
+            event.setGroupID(req.body.groupid);
+
+            if (req.body.groupid != "") {
+                event.setSeries(req.body.freq, req.body.interval, req.body.byweekday, req.body.dtstart, req.body.until);
+                event.setDuration(req.body.duration);
+                event.setExdate(req.body.exdate);
+            }
 
             // save the event to the database
             const eventid = await event.save();
@@ -296,6 +303,33 @@ _.get('/getEvents' ,async (req, res) => {
         res.status(500).json({
             timestamp: Date.now(),
             msg: 'Failed to get events, internal server error',
+            code: 500
+        });
+    }
+});
+
+_.post('/getgroupID' ,async (req, res) => {
+
+    let id;
+    try {
+        const username = req.body.username; 
+        if (groupmap.has(username)== false) {
+            groupmap.set(username, 1);
+        }
+        else {
+            groupmap.set(username, groupmap.get(username) + 1);
+        }
+    
+        id = username + "_" + groupmap.get(username);
+        console.log("getgroupID: ", id);
+
+        res.status(200).json(id);
+
+    } catch (err) {
+        console.error(new Error(err.message));
+        res.status(500).json({
+            timestamp: Date.now(),
+            msg: 'Failed to get groupid, internal server error',
             code: 500
         });
     }

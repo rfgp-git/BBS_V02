@@ -10,6 +10,14 @@ let _ = class Event {
         this.end = null,
         this.userid = null;
         this.dbeventid = null;
+        this.groupid = null;
+        this.freq = null;
+        this.interval = null;
+        this.byweekday = null;
+        this.dtstart = null;
+        this.until = null;
+        this.duration = null;
+        this.exdate = null;
     }
 
     // save event to the database
@@ -33,28 +41,44 @@ let _ = class Event {
     }
 
     setTitle(title) {
-        //console.log('setUserName: ', username);
         this.title=title;
     }
 
     setStartPoint(start) {
-        //console.log('setEMail: ', email);
         this.start=start;
     }
     setEndPoint(end) {
-        //console.log('setEMail: ', email);
         this.end=end;
     }
 
     setUserID(userid) {
-        //console.log('setEMail: ', email);
         this.userid=userid;
     }
 
     setDBEventID(dbeventid) {
-        //console.log('setEMail: ', email);
         this.dbeventid=dbeventid;
     }
+
+    setGroupID(groupid) {
+        this.groupid=groupid;
+    }
+
+    setSeries(freq, interval, byweekday, dtstart, until) {
+        this.freq = freq;
+        this.interval = interval;
+        this.byweekday = byweekday;
+        this.dtstart = dtstart;
+        this.until = until;
+    }
+
+    setDuration(duration) {
+        this.duration=duration;
+    }
+
+    setExdate(exdate) {
+        this.exdate=exdate;
+    }
+    
 }
     
 export default _;

@@ -8,7 +8,17 @@ let _ = class DBEventController {
                 title:   data.title,
                 start:   data.start,
                 end:     data.end,
-                userid:  data.userid
+                userid:  data.userid,
+                groupid: data.groupid,
+                rrule: {
+                    freq:       data.freq,
+                    interval:   data.interval,
+                    byweekday:  [data.byweekday],
+                    dtstart:    data.dtstart,
+                    until:      data.until,
+                },
+                duration: data.duration,
+                exdate: data.exdate
             });
 
             await dbevent.save();

@@ -16,7 +16,23 @@ const bbsEventSchema = new Schema({
     userid: {
         type: mongoose.SchemaTypes.ObjectId,
         ref: 'User'
-    }
+    },
+    groupid: {
+        type: String
+    },
+    rrule: {
+        freq:       String,
+        interval:   Number,
+        byweekday:  [String],
+        dtstart:    String,
+        until:      String
+    },
+    duration: {
+        type: String
+    },
+    exdate: {
+        type: [String]
+    },
 });
 
 const dbbbsevent = mongoose.model('Event', bbsEventSchema);

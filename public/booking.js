@@ -13,6 +13,8 @@ const MODE = {
     CREATE: 3
 }
 
+const wdays = ['So', 'Mo', 'Tu', 'We', 'Tu', 'Fr', 'Sa'];
+
 
 window.onload = async () => {
     
@@ -229,6 +231,26 @@ document.addEventListener('DOMContentLoaded', async function() {
           },
     editable: true,
     dayMaxEvents: true, // allow "more" link when too many events
+
+    events: [
+        // red areas where no events can be dropped
+        {
+            title: 'Recurring Event',
+            //start: '2025-06-17T10:00',
+            //end: '2025-06-17T12:00',
+            color: '#00ff00',
+            rrule: {
+                freq: 'weekly',
+                interval: 2,
+                byweekday: [ 'Tu'],
+                dtstart: '2025-06-17T10:00',
+
+                until: ['2025-12-31'],
+            },
+            duration: '2:00',
+            exdate: '2025-07-01T10:00'
+        },
+    ]
     
     });
 
@@ -327,7 +349,73 @@ async function submitEvent(event) {
     const title = User.user.name + ": " + document.getElementById("eventTitle").value;
     const eventstart = document.getElementById("eventDate").value + "T" + document.getElementById("eventStart").value;
     const eventend = document.getElementById("eventDate").value + "T" + document.getElementById("eventEnd").value;
+    const series = document.getElementById("seriesSelect").value;
+    const date = new Date(eventstart);
+    const day = date.getDay();
+    let exdate= [];
 
+    try {
+        if (processingMode == MODE.CREATE) {
+
+            switch (series) {
+                case "once":
+                    console.log("Serie: " + series + " " + wdays[day]);
+                break;
+                case "weekly":
+                    console.log("Serie: " + series + " " + wdays[day]);
+                    const interval = 1;
+                    const until = '2025-12-31';
+                    const freq = 'weekly';
+                    const duration = getduration(eventstart, eventend);
+                    const daytime = eventstart.split("T");
+
+                    for (let i = 0; i < aholidays.length; i++) {
+                        exdate [i] = aholidays[i] + "T" + daytime[1];
+                    }
+                    
+                    let groupid = await getGroupID(User.user.name);
+                    //let groupID = "test_1";
+                    console.log("GROUPID: ", groupid);
+                    
+                    const dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, groupid, freq, interval, wdays[day], eventstart, until, duration, exdate);
+                    
+                    /*
+                    calendar.addEvent({
+                        title: title,
+                        start: eventstart,
+                        end: eventend,
+                        allDay: event.allDay,
+                        color: '#4E95D9',
+                        extendedProps: {
+                            userid: User.user.id,
+                            _id: dbeventid
+                        },
+                        rrule: {
+                            freq: freq,
+                            interval: interval,
+                            byweekday: [ wdays[day]],
+                            dtstart: eventstart,
+                            until: until 
+                        }
+                    });
+                    */
+                
+                break;
+                case "twoweeks":
+                    console.log("Serie: " + series + " " + wdays[day]);
+                break;
+                default:
+                    console.log("Unbekannte Serie !");
+            }
+        }
+
+
+    } catch (err) {
+        alert('Fehler beim Anlegen oder beim Aktualisieren der Reservierung' + err?.message || 'Unbekannter Fehler');
+    } 
+    
+
+    /*
     try {
         if (processingMode == MODE.CREATE) {
             const dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend );
@@ -355,9 +443,10 @@ async function submitEvent(event) {
     } catch (err) {
         alert('Fehler beim Anlegen oder beim Aktualisieren der Reservierung' + err?.message || 'Unbekannter Fehler');
     }
+        */
 }
 
-async function saveEventtoDB(userid, title, start, end) {
+async function saveEventtoDB(userid, title, start, end, groupid, freq, interval, byweekday, dtstart, until, duration, exdate) {
     console.log("saveEventtoDB: <" + userid + "> <" + title + "> <" + start + "> <" + end +">" );
 
     try {
@@ -371,7 +460,15 @@ async function saveEventtoDB(userid, title, start, end) {
                 userid,
                 title,
                 start,
-                end
+                end,
+                groupid,
+                freq,
+                interval,
+                byweekday,
+                dtstart,
+                until,
+                duration,
+                exdate
             })
         });
 
@@ -480,6 +577,38 @@ async function getEventsfromDB() {
     }
 }
 
+async function getGroupID(username) {
+    
+    try {
+        //const response = await fetch('http://localhost:3000/api/register', {
+        const response = await fetch('api/getgroupID', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify( {
+                username
+            })
+        });
+
+        if (response.ok) {
+            
+        let groupid = await response.json();
+        return groupid;
+
+        } else {
+            if (!response.ok) {
+                const { errors } = await response.json();
+                let testerr=errors[0].msg;
+                throw new Error(testerr);
+            }
+        }
+    } catch (err) {
+        console.log('error: ', err);
+        alert ('Fehler beim Ermiiteln der Group ID ' + err.message ? err.message: 'Unbekannter Fehler');
+    }
+}
+
 async function getpublicHolidays(startyear, endyear) {
     let pholidays=[];
     try {
@@ -520,6 +649,33 @@ function isHoliday(day) {
             result = true;
         }
     }
+    return result;
+
+}
+
+function getduration(datestart, datend) {
+    let result = "";
+    
+    const startTime = new Date(datestart); 
+    const endTime = new Date(datend);
+
+    // Calculate the difference in milliseconds
+    const durationMs = endTime - startTime;
+
+    // Convert milliseconds to hours and minutes
+    let hours = (Math.floor(durationMs / (1000 * 60 * 60))).toString();
+    let minutes = (Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60))).toString();
+
+    // leading zero
+    if (hours.length == 1) {
+        hours = "0" + hours;
+    }
+    if (minutes.length == 1) {
+        minutes = "0" + minutes;
+    }
+
+    result = hours + ":" + minutes;
+
     return result;
 
 }
