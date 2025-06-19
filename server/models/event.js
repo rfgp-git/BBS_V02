@@ -10,7 +10,7 @@ let _ = class Event {
         this.end = null,
         this.userid = null;
         this.dbeventid = null;
-        this.groupid = null;
+        this.groupId = null;
         this.freq = null;
         this.interval = null;
         this.byweekday = null;
@@ -59,8 +59,8 @@ let _ = class Event {
         this.dbeventid=dbeventid;
     }
 
-    setGroupID(groupid) {
-        this.groupid=groupid;
+    setGroupID(groupId) {
+        this.groupId=groupId;
     }
 
     setSeries(freq, interval, byweekday, dtstart, until) {

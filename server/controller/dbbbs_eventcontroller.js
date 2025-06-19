@@ -4,22 +4,36 @@ let _ = class DBEventController {
 
     async dbcreateEvent(data) {
         try {
-            let dbevent = new dbbbsevent({
-                title:   data.title,
-                start:   data.start,
-                end:     data.end,
-                userid:  data.userid,
-                groupid: data.groupid,
-                rrule: {
-                    freq:       data.freq,
-                    interval:   data.interval,
-                    byweekday:  [data.byweekday],
-                    dtstart:    data.dtstart,
-                    until:      data.until,
-                },
-                duration: data.duration,
-                exdate: data.exdate
-            });
+            let dbevent;
+            if (data.groupId === null){
+                dbevent = new dbbbsevent({
+                    title:   data.title,
+                    start:   data.start,
+                    end:     data.end,
+                    userid:  data.userid,
+                    groupId: data.groupId,
+                    //rrule: {},
+                    //duration: data.duration,
+                    //exdate: data.exdate
+                });
+            } else {
+                dbevent = new dbbbsevent({
+                    title:   data.title,
+                    start:   data.start,
+                    end:     data.end,
+                    userid:  data.userid,
+                    groupId: data.groupId,
+                    rrule: {
+                        freq:       data.freq,
+                        interval:   data.interval,
+                        byweekday:  [data.byweekday],
+                        dtstart:    data.dtstart,
+                        until:      data.until,
+                    },
+                    duration: data.duration,
+                    exdate: data.exdate
+                });
+            }
 
             await dbevent.save();
             console.log('Event saved', dbevent);

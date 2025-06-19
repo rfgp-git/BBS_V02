@@ -196,9 +196,9 @@ _.post('/saveEvent',  async (req,res) => {
             event.setStartPoint(req.body.start);
             event.setEndPoint(req.body.end);
             event.setUserID(req.body.userid);
-            event.setGroupID(req.body.groupid);
+            event.setGroupID(req.body.groupId);
 
-            if (req.body.groupid != "") {
+            if (req.body.groupId != null) {
                 event.setSeries(req.body.freq, req.body.interval, req.body.byweekday, req.body.dtstart, req.body.until);
                 event.setDuration(req.body.duration);
                 event.setExdate(req.body.exdate);

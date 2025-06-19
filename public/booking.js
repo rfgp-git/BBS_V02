@@ -5,6 +5,7 @@ let startyear;
 let endyear;
 let processingMode;
 let existingEvent = {};
+let exEventIndex = -1;
 let dbevents = [];
 
 const MODE = {
@@ -14,10 +15,16 @@ const MODE = {
 }
 
 const wdays = ['So', 'Mo', 'Tu', 'We', 'Tu', 'Fr', 'Sa'];
-
+let seriesmap = new Map();
 
 window.onload = async () => {
     
+    seriesmap.set('once',0);
+    seriesmap.set('weekly_1',1);
+    seriesmap.set('weekly_2',2);
+    seriesmap.set('weekly_3',3);
+
+
     if (!sessionStorage.getItem('isAuthenticated')) {
         alert('Zugriff verweigert');
         window.location.href = 'index.html';
@@ -76,15 +83,41 @@ window.onload = async () => {
         if (User.user.id === dbevents.events[i].userid ) {
             //dbevents.events[i].color='#00ff00';
             dbevents.events[i].color='#4E95D9';
+            if (dbevents.events[i].groupId != null) {
+                calendar.addEvent(dbevents.events[i]);
+            } else {
+                calendar.addEvent({
+                    title:  dbevents.events[i].title,
+                    start:  dbevents.events[i].start,
+                    end:    dbevents.events[i].end,
+                    color:  '#4E95D9',
+                    extendedProps: {
+                        userid: User.user.id,
+                        _id: dbevents.events[i]._id
+                    },
+                });
+            }
         } else {
             dbevents.events[i].overlap   = false,
             dbevents.events[i].editable  = false,
             dbevents.events[i].draggable = false,
             dbevents.events[i].allow     = false,
             dbevents.events[i].color     = '#808080'; 
+            if (dbevents.events[i].groupId != null) {
+                calendar.addEvent(dbevents.events[i]);
+            } else {
+                calendar.addEvent({
+                    title:  dbevents.events[i].title,
+                    start:  dbevents.events[i].start,
+                    end:    dbevents.events[i].end,
+                    color:  '#808080',
+                    extendedProps: {
+                        userid: User.user.id,
+                        _id: dbevents.events[i]._id
+                    },
+                });
+            }
         }
-        
-        calendar.addEvent(dbevents.events[i]);
     }
 
     // toolbar actions
@@ -221,10 +254,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         },
         */
         eventClick: async function(arg) {
-
+            exEventIndex = -1;
             if (User.user.id === arg.event._def.extendedProps.userid) {
                 // update existing event
                 existingEvent = arg;
+                if (existingEvent.event._def.groupId != "") {
+                    exEventIndex = getEvIndex(existingEvent.event._def.groupId);
+                }
+                    
                 processingMode = MODE.UPDATE;
                 openModalDialog(arg);
             }
@@ -239,6 +276,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             //start: '2025-06-17T10:00',
             //end: '2025-06-17T12:00',
             color: '#00ff00',
+            groupId: 'groupTest',
             rrule: {
                 freq: 'weekly',
                 interval: 2,
@@ -301,6 +339,16 @@ function openModalDialog(event) {
         document.getElementById("eventDate").value = startdaytime[0];
         document.getElementById("eventStart").value = startdaytime[1];
         document.getElementById("eventEnd").value = enddaytime[1];
+
+        const sb_series=document.getElementById("seriesSelect");
+        sb_series[0].selected = true;
+
+        // select the saved frequence
+        if (exEventIndex != -1) {
+
+            const selIndex=seriesmap.get(dbevents.events[exEventIndex].rrule.freq + "_" + dbevents.events[exEventIndex].rrule.interval);
+            sb_series[selIndex].selected = true;
+        }
         
     }
 
@@ -330,7 +378,17 @@ async function deleteEvent(event) {
 }
 
 async function submitEvent(event) {
-    console.log("submit");
+
+    let interval    = null;
+    let until       = null;
+    let freq        = null;
+    let duration    = null;
+    let exdate      = [];
+    let dbeventid   = null;
+    let groupId     = null;
+    let wday        = null;
+    let dtstart     = null;
+
     event.preventDefault();
     
     const form=document.getElementById("eventModal");
@@ -344,40 +402,45 @@ async function submitEvent(event) {
 
     console.log("Bezeichnung: ", document.getElementById("eventTitle").value);
 
-    
-
     const title = User.user.name + ": " + document.getElementById("eventTitle").value;
     const eventstart = document.getElementById("eventDate").value + "T" + document.getElementById("eventStart").value;
     const eventend = document.getElementById("eventDate").value + "T" + document.getElementById("eventEnd").value;
-    const series = document.getElementById("seriesSelect").value;
+    const series = document.getElementById("seriesSelect").value.split('_');
+
+    const series_freq = series[0];
+    const series_interval = series[1];
+
     const date = new Date(eventstart);
     const day = date.getDay();
-    let exdate= [];
+    
 
     try {
         if (processingMode == MODE.CREATE) {
 
-            switch (series) {
+            switch (series_freq) {
                 case "once":
                     console.log("Serie: " + series + " " + wdays[day]);
+                    dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, groupId, freq, interval, wday, dtstart, until, duration, exdate);
                 break;
                 case "weekly":
                     console.log("Serie: " + series + " " + wdays[day]);
-                    const interval = 1;
-                    const until = '2025-12-31';
-                    const freq = 'weekly';
-                    const duration = getduration(eventstart, eventend);
+                    interval = series_interval;
+                    until = '2025-12-31';
+                    freq = 'weekly';
+                    duration = getduration(eventstart, eventend);
                     const daytime = eventstart.split("T");
 
                     for (let i = 0; i < aholidays.length; i++) {
                         exdate [i] = aholidays[i] + "T" + daytime[1];
                     }
                     
-                    let groupid = await getGroupID(User.user.name);
+                    groupId = await getGroupID(User.user.name);
                     //let groupID = "test_1";
-                    console.log("GROUPID: ", groupid);
+                    console.log("GROUPID: ", groupId);
+                    wday    = wdays[day];
+                    dtstart = eventstart;
                     
-                    const dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, groupid, freq, interval, wdays[day], eventstart, until, duration, exdate);
+                    dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, groupId, freq, interval, wdays[day], dtstart, until, duration, exdate);
                     
                     /*
                     calendar.addEvent({
@@ -446,7 +509,7 @@ async function submitEvent(event) {
         */
 }
 
-async function saveEventtoDB(userid, title, start, end, groupid, freq, interval, byweekday, dtstart, until, duration, exdate) {
+async function saveEventtoDB(userid, title, start, end, groupId, freq, interval, byweekday, dtstart, until, duration, exdate) {
     console.log("saveEventtoDB: <" + userid + "> <" + title + "> <" + start + "> <" + end +">" );
 
     try {
@@ -461,7 +524,7 @@ async function saveEventtoDB(userid, title, start, end, groupid, freq, interval,
                 title,
                 start,
                 end,
-                groupid,
+                groupId,
                 freq,
                 interval,
                 byweekday,
@@ -593,8 +656,8 @@ async function getGroupID(username) {
 
         if (response.ok) {
             
-        let groupid = await response.json();
-        return groupid;
+        let groupId = await response.json();
+        return groupId;
 
         } else {
             if (!response.ok) {
@@ -678,4 +741,16 @@ function getduration(datestart, datend) {
 
     return result;
 
+}
+
+function getEvIndex(evgroupid) {
+    let result = -1;
+    for (let i = 0; i < dbevents.events.length; i++) {
+        if (User.user.id === dbevents.events[i].userid ) {
+            if (evgroupid === dbevents.events[i].groupId) {
+                result = i;
+            }
+        }
+    }
+    return result;
 }

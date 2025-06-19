@@ -17,7 +17,7 @@ const bbsEventSchema = new Schema({
         type: mongoose.SchemaTypes.ObjectId,
         ref: 'User'
     },
-    groupid: {
+    groupId: {
         type: String
     },
     rrule: {
