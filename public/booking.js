@@ -450,6 +450,15 @@ async function submitEvent(event) {
     const title = User.user.name + ": " + document.getElementById("eventTitle").value;
     const eventstart = document.getElementById("eventDate").value + "T" + document.getElementById("eventStart").value;
     const eventend = document.getElementById("eventDate").value + "T" + document.getElementById("eventEnd").value;
+    const startTime = new Date(eventstart);
+    const endTime = new Date(eventend);
+
+    if (endTime <= startTime) {
+        event.preventDefault(); // Prevent form submission
+        alert("Die Ende-Zeit mus größer als die Start-Zeit sein!");
+        return;
+    }
+
     const series = document.getElementById("seriesSelect").value.split('_');
 
     const series_freq = series[0];
