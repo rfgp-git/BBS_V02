@@ -457,6 +457,8 @@ async function submitEvent(event) {
 
     const date = new Date(eventstart);
     const day = date.getDay();
+    const lastdayofYear = new Date(new Date().getFullYear(), 11, 31);
+    const untilday = lastdayofYear.toISOString().split("T");
     
 
     try {
@@ -470,7 +472,7 @@ async function submitEvent(event) {
                 case "weekly":
                     console.log("Serie: " + series + " " + wdays[day]);
                     interval = series_interval;
-                    until = '2025-12-31';
+                    until = untilday[0];    //'2025-12-31';
                     freq = 'weekly';
                     duration = getduration(eventstart, eventend);
                     const daytime = eventstart.split("T");
@@ -501,7 +503,6 @@ async function submitEvent(event) {
                     
                 break;
                 case "weekly":
-                    until = '2025-12-31';
                     freq = 'weekly';
                     interval = series_interval;
                     duration = getduration(eventstart, eventend);
