@@ -233,7 +233,7 @@ _.post('/updateEvent',  async (req,res) => {
             const eventstart = req.body.start;
             const eventend = req.body.end;
 
-            const result= await DB.updateEvent(eventid, eventtitle, eventstart, eventend );
+            const result= await DB.updateEvent(eventid, eventtitle, req.body.start, req.body.end, req.body.freq, req.body.interval, req.body.weekday, req.body.duration, req.body.exdate);
             if (result) { 
                 res.status(200).json({
                 timestamp: Date.now(),

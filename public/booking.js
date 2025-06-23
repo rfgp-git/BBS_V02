@@ -82,7 +82,7 @@ window.onload = async () => {
     for (let i = 0; i < dbevents.events.length; i++) {
         if (User.user.id === dbevents.events[i].userid ) {
             //dbevents.events[i].color='#00ff00';
-            dbevents.events[i].color='#4E95D9';
+            dbevents.events[i].color='#4CAF50';
             if (dbevents.events[i].groupId != null) {
                 calendar.addEvent(dbevents.events[i]);
             } else {
@@ -242,17 +242,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             processingMode = MODE.CREATE;
             openModalDialog(arg);
 
-            //calendar.unselect();
         },
-        /*
-            eventChange: async function (info) {
-            let updatedEvent = info.event;
-            console.log("eventChanged: ", updatedEvent.startStr);
-            console.log("eventChanged: ", updatedEvent.endStr);
-            //updatedEvent.setProp('color','#6080D3');
-            const dbeventid= await updateEventinDB(updatedEvent._def.extendedProps._id, updatedEvent.title, updatedEvent.startStr, updatedEvent.endStr );
-        },
-        */
+        
         eventClick: async function(arg) {
             exEventIndex = -1;
             if (User.user.id === arg.event._def.extendedProps.userid) {
@@ -269,6 +260,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     editable: true,
     dayMaxEvents: true, // allow "more" link when too many events
 
+    /*
     events: [
         // red areas where no events can be dropped
         {
@@ -289,6 +281,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             exdate: '2025-07-01T10:00'
         },
     ]
+    */
     
     });
 
@@ -322,6 +315,14 @@ function openModalDialog(event) {
         
         // set end time with leading zero
         document.getElementById("eventEnd").value = ihour.toString().padStart(2,"0") + ":" + startMinutes;
+        
+        const sb_series=document.getElementById("seriesSelect");
+        // enable all options
+        for (let i=0; i< sb_series.length; i ++) {
+            sb_series.options[i].disabled = false;
+        }
+        // default: once
+        sb_series[0].selected = true;
     }
 
     if (processingMode == MODE.UPDATE) {
@@ -341,17 +342,33 @@ function openModalDialog(event) {
         document.getElementById("eventEnd").value = enddaytime[1];
 
         const sb_series=document.getElementById("seriesSelect");
+        
+        // disable series frequence
+        for (let i=0; i< sb_series.length; i ++) {
+            if (i == 0) {
+                sb_series.options[i].disabled = false;
+            } else {
+                sb_series.options[i].disabled = true;
+            }
+        }
         sb_series[0].selected = true;
 
+        
         // select the saved frequence
         if (exEventIndex != -1) {
-
+            // disable once
+            for (let i=0; i< sb_series.length; i ++) {
+                if (i == 0) {
+                    sb_series.options[i].disabled = true;
+                } else {
+                    sb_series.options[i].disabled = false;
+                }
+            }
+            
             const selIndex=seriesmap.get(dbevents.events[exEventIndex].rrule.freq + "_" + dbevents.events[exEventIndex].rrule.interval);
             sb_series[selIndex].selected = true;
         }
-        
     }
-
     // Open modal dialog
     mDialog.style.display = 'block';
     //mDialog.fadeIn(200);
@@ -371,9 +388,37 @@ function closeModalDialog() {
 }
 
 async function deleteEvent(event) {
-    console.log("delete: ", event);
-    await removeEventfromDB(existingEvent.event._def.extendedProps._id);
-    existingEvent.event.remove();
+    //let newexdate = [];
+    
+    if (existingEvent.event._def.groupId != "" ) {
+        
+        let choice = prompt('Soll der Termin oder die ganze Serie gelöscht werden (T/S) ?');
+
+        if (choice == 'T') {
+            const dbeventid= await updateEventinDB( existingEvent.event._def.extendedProps._id,
+                                                    dbevents.events[exEventIndex].title,
+                                                    dbevents.events[exEventIndex].start,
+                                                    dbevents.events[exEventIndex].end,
+                                                    dbevents.events[exEventIndex].rrule.freq,
+                                                    dbevents.events[exEventIndex].rrule.interval,
+                                                    dbevents.events[exEventIndex].rrule.byweekday,
+                                                    dbevents.events[exEventIndex].duration,
+                                                    existingEvent.event.startStr
+                                                );
+            // reload paege
+            location.reload();
+        }
+        
+        if (choice == 'S') {
+            await removeEventfromDB(existingEvent.event._def.extendedProps._id);
+            existingEvent.event.remove();    
+        } 
+        
+    } else {
+        await removeEventfromDB(existingEvent.event._def.extendedProps._id);
+        existingEvent.event.remove();
+    }
+        
     closeModalDialog();
 }
 
@@ -420,7 +465,7 @@ async function submitEvent(event) {
             switch (series_freq) {
                 case "once":
                     console.log("Serie: " + series + " " + wdays[day]);
-                    dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, groupId, freq, interval, wday, dtstart, until, duration, exdate);
+                    dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, groupId, freq, interval, wday, until, dtstart, duration, exdate);
                 break;
                 case "weekly":
                     console.log("Serie: " + series + " " + wdays[day]);
@@ -442,71 +487,37 @@ async function submitEvent(event) {
                     
                     dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, groupId, freq, interval, wdays[day], dtstart, until, duration, exdate);
                     
-                    /*
-                    calendar.addEvent({
-                        title: title,
-                        start: eventstart,
-                        end: eventend,
-                        allDay: event.allDay,
-                        color: '#4E95D9',
-                        extendedProps: {
-                            userid: User.user.id,
-                            _id: dbeventid
-                        },
-                        rrule: {
-                            freq: freq,
-                            interval: interval,
-                            byweekday: [ wdays[day]],
-                            dtstart: eventstart,
-                            until: until 
-                        }
-                    });
-                    */
-                
                 break;
-                case "twoweeks":
-                    console.log("Serie: " + series + " " + wdays[day]);
-                break;
+
                 default:
                     console.log("Unbekannte Serie !");
             }
         }
+        if (processingMode == MODE.UPDATE) {
+            exdate= null;
 
+            switch (series_freq) {
+                case "once":
+                    
+                break;
+                case "weekly":
+                    until = '2025-12-31';
+                    freq = 'weekly';
+                    interval = series_interval;
+                    duration = getduration(eventstart, eventend);
+                    wday    = wdays[day];
+                    dtstart = eventstart;
+                break;
+                default:
+                    console.log("Unbekannte Serie !");
+            }
+            
+            dbeventid= await updateEventinDB(existingEvent.event._def.extendedProps._id, title, eventstart, eventend, freq, interval, wday, duration, exdate);
+        }
 
     } catch (err) {
         alert('Fehler beim Anlegen oder beim Aktualisieren der Reservierung' + err?.message || 'Unbekannter Fehler');
     } 
-    
-
-    /*
-    try {
-        if (processingMode == MODE.CREATE) {
-            const dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend );
-            
-            calendar.addEvent({
-                title: title,
-                start: eventstart,
-                end: eventend,
-                allDay: event.allDay,
-                //color: '#5BC26D',
-                color: '#4E95D9',
-                extendedProps: {
-                    userid: User.user.id,
-                    _id: dbeventid
-                }
-            });
-        }
-
-        if (processingMode == MODE.UPDATE) {
-            const dbeventid= await updateEventinDB(existingEvent.event._def.extendedProps._id, title, eventstart, eventend );
-            existingEvent.event.setProp('title', title);
-            existingEvent.event.setStart(eventstart);
-            existingEvent.event.setEnd(eventend);
-        }
-    } catch (err) {
-        alert('Fehler beim Anlegen oder beim Aktualisieren der Reservierung' + err?.message || 'Unbekannter Fehler');
-    }
-        */
 }
 
 async function saveEventtoDB(userid, title, start, end, groupId, freq, interval, byweekday, dtstart, until, duration, exdate) {
@@ -550,7 +561,7 @@ async function saveEventtoDB(userid, title, start, end, groupId, freq, interval,
     }
 }
 
-async function updateEventinDB(eventid, title, start, end) {
+async function updateEventinDB(eventid, title, start, end, freq, interval, weekday, duration, exdate) {
     console.log("updateEventinDB: <" + eventid + "> <" + title + "> <" + start + "> <" + end +">" );
 
     try {
@@ -564,7 +575,12 @@ async function updateEventinDB(eventid, title, start, end) {
                 eventid,
                 title,
                 start,
-                end
+                end,
+                freq,
+                interval,
+                weekday,
+                duration,
+                exdate
             })
         });
 

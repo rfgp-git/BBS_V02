@@ -17,13 +17,13 @@ let _ = class DB {
         return false;
     };
 
-    // delete event
-    static async updateEvent(eventID, title, start, stop) {
+    // update event
+    static async updateEvent(eventID, title, start, stop, freq, interval, weekday, duration, exdate) {
         
         if (eventID) {
             const eventcontroller = new DBEventController();
             // update Event in DB 
-            const result = await eventcontroller.dbupdateEvent(eventID, title, start, stop);
+            const result = await eventcontroller.dbupdateEvent(eventID, title, start, stop, freq, interval, weekday, duration, exdate);
             if (result == 0) {
                 return false;
             } else {

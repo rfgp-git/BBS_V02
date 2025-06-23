@@ -43,12 +43,24 @@ let _ = class DBEventController {
         }
     }
 
-    async dbupdateEvent(eventID, title, start, end) {
+    async dbupdateEvent(eventID, title, start, end, freq, interval, weekday, duration, exdate ) {
         try {
             const dbevent = await dbbbsevent.findOne({_id: eventID} );
-            dbevent.title= title;
-            dbevent.start= start;
-            dbevent.end= end;
+            
+            dbevent.title = title;
+            dbevent.start = start;
+            dbevent.end   = end;
+
+            if (dbevent.groupId != null) {
+                dbevent.rrule.freq = freq;
+                dbevent.rrule.interval = interval;
+                dbevent.rrule.byweekday = weekday;
+                dbevent.rrule.dtstart = start;
+                dbevent.duration = duration;
+                if (exdate != null) {
+                    dbevent.exdate.push(exdate);
+                }
+            } 
 
             dbevent.save();
 
