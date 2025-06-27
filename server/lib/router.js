@@ -4,9 +4,7 @@ import Event from '../models/event.js';
 import passport from 'passport';
 import DB from '../lib/db.js';
 import Holidays from 'date-holidays';
-
-
-
+import jsonclosedDays from '../bbs_closed_days.json' with { type: 'json' };
 
 
 import  {body, validationResult, checkSchema, matchedData } from 'express-validator';
@@ -359,6 +357,18 @@ _.post('/getHolidays' ,async (req, res) => {
                     publicholidays.push(event);
                 }
             }
+        }
+
+        console.log("Closed Days:", jsonclosedDays);
+
+        for (let i =0;i < jsonclosedDays.length; i++) {
+            let event = new Event();
+            
+            event.setTitle(jsonclosedDays[i].title);
+            event.setStartPoint(jsonclosedDays[i].start);
+            event.setEndPoint(jsonclosedDays[i].end);
+            
+            publicholidays.push(event);    
         }
 
         res.status(200).json({publicholidays});

@@ -34,9 +34,11 @@ _.start = () => {
         const apiKey = process.env.API_KEY;
         //const apiKey = process.env.DB_CONNECT_KEY; //Secrets from github
         console.log("Your API Key is:", apiKey);
+        const dbconnectstring= 'mongodb+srv://' + apiKey + '@cluster0.mehevcm.mongodb.net/testdb';
+
         //mongoose.connect('mongodb://localhost:27017/testdb');
         
-        const dbconnectstring= 'mongodb+srv://' + apiKey + '@cluster0.mehevcm.mongodb.net/testdb';
+        
         //mongoose.connect('mongodb+srv://petertyrach:u5mwg5Pk3Q4pKchy@cluster0.mehevcm.mongodb.net/testdb');
         mongoose.connect(dbconnectstring);
         const db = mongoose.connection;

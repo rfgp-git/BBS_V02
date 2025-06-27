@@ -1,6 +1,7 @@
 let User = {};
 let calendar;
 let aholidays = [];
+let aclosed = [];
 let startyear;
 let endyear;
 let processingMode;
@@ -238,6 +239,13 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return false; 
             }
 
+            // check if day is holiday to disable select
+            if (isClosed(startdaytime[0])) {
+                calendar.unselect();
+                arg.jsEvent.stopPropagation();
+                return false; 
+            }
+
             // open modal dialog
             processingMode = MODE.CREATE;
             openModalDialog(arg);
@@ -259,7 +267,16 @@ document.addEventListener('DOMContentLoaded', async function() {
           },
     editable: true,
     dayMaxEvents: true, // allow "more" link when too many events
-
+    /*
+    events: 'bbs_closed_days.json',
+    eventDidMount: function(info) {
+        if (info.event.title == 'Kegelbahn geschlossen') {
+           if (!aclosed.includes(info.event.startStr)) {
+                    aclosed.push(info.event.startStr);
+            }
+        }
+    }
+*/
     /*
     events: [
         // red areas where no events can be dropped
@@ -455,7 +472,7 @@ async function submitEvent(event) {
 
     if (endTime <= startTime) {
         event.preventDefault(); // Prevent form submission
-        alert("Die Ende-Zeit mus größer als die Start-Zeit sein!");
+        alert("Die Ende-Zeit muss größer als die Start-Zeit sein!");
         return;
     }
 
@@ -735,6 +752,17 @@ function isHoliday(day) {
     let result = false;
     for (let i= 0; i<aholidays.length;i++) {
         if (day === aholidays[i]) {
+            result = true;
+        }
+    }
+    return result;
+
+}
+
+function isClosed(day) {
+    let result = false;
+    for (let i= 0; i<aclosed.length;i++) {
+        if (day === aclosed[i]) {
             result = true;
         }
     }
