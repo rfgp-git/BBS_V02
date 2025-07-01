@@ -14,6 +14,22 @@ export const UserValidationSchema = {
             errorMessage: 'Der Benutzername muss eine Zeichenfolge sein'
         }
     },
+    contactperson: {
+        notEmpty: {
+            errorMessage: 'Die Kontakt-Person darf nicht leer sein'
+        },
+        isString: {
+            errorMessage: 'Die Kontakt-Person muss eine Zeichenfolge sein'
+        }
+    },
+    phone: {
+        notEmpty: {
+            errorMessage: 'Die Telefon Nr. darf nicht leer sein'
+        },
+        isString: {
+            errorMessage: 'Die Telefon Nr. muss eine Zeichenfolge sein'
+        }
+    },
     email: {
         isEmail: {
             errorMessage: 'Bitte eine gültige E-Mail Adresse eingeben'
@@ -48,6 +64,5 @@ export const UserValidationSchema = {
             errorMessage: 'Das Passwort muss eine Zeichenfolge sein'
         }
 
-    } 
-
+    }
 };

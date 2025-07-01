@@ -11,12 +11,22 @@ regformdiv.addEventListener('submit', async(event) => {
     event.preventDefault();
 
     const username = document.getElementById('username').value;
+    const contactperson = document.getElementById('contactperson').value;
+    const phone = document.getElementById('phone').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    
 
-    if (!username || !email || !password) {
+    if (!username || !contactperson || !phone || !email || !password) {
         errMsgDiv.innerHTML = 'Alle Felder müssen ausgefüllt sein';
         return;
+    }
+
+    const phonePattern = /^(\+49|0)[1-9][0-9\s\-()]{7,14}$/;
+    if (!phonePattern.test(phone)) {
+      event.preventDefault();
+      errMsgDiv.innerHTML = 'Bitt eine deutsche Telefon Nummer eingeben !';
+      return;
     }
 
     try {
@@ -28,6 +38,8 @@ regformdiv.addEventListener('submit', async(event) => {
             },
             body: JSON.stringify({
                 username,
+                contactperson,
+                phone,
                 email,
                 password
             })

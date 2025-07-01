@@ -7,12 +7,21 @@ const bbsuserSchema = new Schema({
     username : {
         type: String
     },
+    contact : {
+        type: String
+    },
+    phone : {
+        type: String
+    },
     email : {
         type: String
     },
     password: {
         type: String
-    }
+    },
+    role : {
+        type: String
+    },
 });
 
 const dbbbsuser = mongoose.model('User', bbsuserSchema);

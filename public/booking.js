@@ -15,7 +15,7 @@ const MODE = {
     CREATE: 3
 }
 
-const wdays = ['So', 'Mo', 'Tu', 'We', 'Tu', 'Fr', 'Sa'];
+const wdays = ['So', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 let seriesmap = new Map();
 
 window.onload = async () => {
@@ -24,7 +24,6 @@ window.onload = async () => {
     seriesmap.set('weekly_1',1);
     seriesmap.set('weekly_2',2);
     seriesmap.set('weekly_3',3);
-
 
     if (!sessionStorage.getItem('isAuthenticated')) {
         alert('Zugriff verweigert');
@@ -58,6 +57,7 @@ window.onload = async () => {
     }
 
     console.log("User: ", User.user.name + " " + User.user.id);
+
     processingMode=MODE.VIEW;
 
     // get publich holidays
@@ -210,6 +210,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             start: startyear + '-01-01', // Start range 2024-0-01
             end: endyear + '-01-01'   // End of the range (exclusive) 2027-01-01
         },
+        slotMinTime: '09:00', // Start displaying from 9 AM
+        slotMaxTime: '23:00', // End displaying at 5 PM
         longPressDelay:100,
         hiddenDays: [0],
         locale: 'DE',

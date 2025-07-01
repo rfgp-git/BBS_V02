@@ -35,14 +35,21 @@ _.post('/register', checkSchema(UserValidationSchema), async (req,res) => {
     
     try {
         const result = validationResult(req);
-
+        console.log('req:', req);
         if (result.isEmpty()){
             const data = matchedData(req);
             //console.log('data:', data);
 
             let user = new User();
             user.setUserName(data.username);
+            user.setContactPerson(data.contactperson);
+            user.setPhoneNo(data.phone);
             user.setEMail(data.email);
+            if (data.username != 'Admin') {
+                user.setUserRole('Bowler');
+            } else {
+                user.setUserRole('Admin');
+            }
             
             let passwdresult = await user.setPassword(data.password);
             //console.log('passwdresult:',passwdresult);
@@ -143,8 +150,8 @@ _.post('/logout', async (req,res) => {
     }
 });
 
-//_.get('/user', reqireAuth ,async (req, res) => { cookie to be done
-_.get('/user', async (req, res) => {
+_.get('/user', reqireAuth ,async (req, res) => { 
+//_.get('/user', async (req, res) => {
 
     try {
         console.group('\n GET /user - request details:');

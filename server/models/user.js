@@ -10,8 +10,11 @@ let _ = class User {
         this.created = Date.now();
         this.id = uuidv4();
         this.username = null,
+        this.contact = null,
+        this.phone = null,
         this.email = null,
         this.password = null,
+        this.role = null,
         this.banned = false;
     }
 
@@ -31,6 +34,15 @@ let _ = class User {
         //console.log('setUserName: ', username);
         this.username=username;
     }
+
+    setContactPerson(contact) {
+        this.contact=contact;
+    }
+
+    setPhoneNo(phone) {
+        this.phone=phone;
+    }
+
 
     setEMail(email) {
         //console.log('setEMail: ', email);
@@ -60,6 +72,10 @@ let _ = class User {
             console.log("Sonderzeichen wird mehrfach verwendet");
             return false;
         }
+    }
+
+    setUserRole(role) {
+        this.role=role;
     }
 
     async parseUser() {

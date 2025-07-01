@@ -40,8 +40,11 @@ let _ = class DBUserController {
         try {
             let user= new dbbbsuser({
                 username:   data.username,
+                contact:    data.contact,
+                phone:      data.phone,
                 email:      data.email,
-                password:   data.password
+                password:   data.password,
+                role:       data.role
             });
 
             const existingUser = await dbbbsuser.findOne({
