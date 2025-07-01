@@ -29,34 +29,18 @@ window.onload = async () => {
         alert('Zugriff verweigert');
         window.location.href = 'index.html';
     } else {
-
-        try {
-
-            const response = await fetch('api/user', {
-                method: 'GET',
-                headers: {
-                    'Contetnt-Type': '/application/json'
-                },
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-            
-                User = await response.json();
-
-                document.getElementById('userID').innerHTML = User.user.name;
-                
-            } else {
-                const {msg} = await response.json();
-                throw new Error(msg);
-            }
-
-        } catch(err) {
-            alert('Benutzername konnte nicht ermittelt werden ' + err?.message || 'Unbekannter Fehler');
-        }
+        // Retrieve the JSON string from local storage
+        let retString = localStorage.getItem("ActiveUser");
+         if (retString != null) {
+            // Convert the JSON string back to an array
+            User = JSON.parse(retString);
+            console.log("User: ", User.user.name + " " + User.user.id);
+            document.getElementById('userID').innerHTML = User.user.name;
+         } else {
+            document.getElementById('userID').innerHTML = 'MURX';
+         }
+        
     }
-
-    console.log("User: ", User.user.name + " " + User.user.id);
 
     processingMode=MODE.VIEW;
 
@@ -82,8 +66,7 @@ window.onload = async () => {
 
     for (let i = 0; i < dbevents.events.length; i++) {
         if (User.user.id === dbevents.events[i].userid ) {
-            //dbevents.events[i].color='#00ff00';
-            dbevents.events[i].color='#4CAF50';
+            dbevents.events[i].color='#4CAF50'; // green
             if (dbevents.events[i].groupId != null) {
                 calendar.addEvent(dbevents.events[i]);
             } else {
@@ -91,7 +74,7 @@ window.onload = async () => {
                     title:  dbevents.events[i].title,
                     start:  dbevents.events[i].start,
                     end:    dbevents.events[i].end,
-                    color:  '#4E95D9',
+                    color:  '#4E95D9', // blue
                     extendedProps: {
                         userid: User.user.id,
                         _id: dbevents.events[i]._id
@@ -103,7 +86,7 @@ window.onload = async () => {
             dbevents.events[i].editable  = false,
             dbevents.events[i].draggable = false,
             dbevents.events[i].allow     = false,
-            dbevents.events[i].color     = '#808080'; 
+            dbevents.events[i].color     = '#808080'; // grey
             if (dbevents.events[i].groupId != null) {
                 calendar.addEvent(dbevents.events[i]);
             } else {
@@ -113,7 +96,7 @@ window.onload = async () => {
                     end:    dbevents.events[i].end,
                     color:  '#808080',
                     extendedProps: {
-                        userid: User.user.id,
+                        userid: dbevents.events[i].userid,
                         _id: dbevents.events[i]._id
                     },
                 });

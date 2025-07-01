@@ -14,7 +14,7 @@ window.onload = () => {
 document.getElementById('login-button').addEventListener('click', async event => {
 
         event.preventDefault();
-
+        localStorage.clear();
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const errmsgDiv = document.getElementById('error-message');
@@ -41,17 +41,37 @@ document.getElementById('login-button').addEventListener('click', async event =>
             
             if (response.ok) {
                 sessionStorage.setItem('isAuthenticated', true);
-                window.location.href = redirectTo + '.html';
+                // get User details
+                try {
+                    const response = await fetch('api/user', {
+                        method: 'GET',
+                        headers: {
+                            'Contetnt-Type': '/application/json'
+                        },
+                        credentials: 'include'
+                    });
+
+                    if (response.ok) {
+                    
+                        User = await response.json();
+                        // Convert the array to a JSON string
+                        let string = JSON.stringify(User);
+                        // Store the JSON string in local storage
+                        localStorage.setItem("ActiveUser", string);
+                        window.location.href = redirectTo + '.html';
+                    } else {
+                        const {msg} = await response.json();
+                        throw new Error(msg);
+                    }
+
+                } catch(err) {
+                    alert('Benutzername konnte nicht ermittelt werden ' + err?.message || 'Unbekannter Fehler');
+                }
+                
             } else {
                 errmsgDiv.innerHTML='login fehlgeschlagen ' + msg ? msg : 'Unbekannter Fehler';
             }
-
         } catch(err) {
             errmsgDiv.innerHTML=err?.message || 'Login fehlgeschlagen';
         }
-
-
-
-
-
 });
