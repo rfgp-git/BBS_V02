@@ -117,7 +117,7 @@ _.post('/login',
                             return next(err);
                         }
                         res.status(200).json({
-                        redirectTo: '/booking'
+                        redirectTo: '/bbs_latest'
                         })
                     });
                 

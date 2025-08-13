@@ -25,6 +25,9 @@ window.onload = async () => {
     seriesmap.set('weekly_2',2);
     seriesmap.set('weekly_3',3);
 
+    let menuItem1 = document.getElementById("Menu_Profile1");
+    let menuItem2 = document.getElementById("Menu_Profile2");
+
     if (!sessionStorage.getItem('isAuthenticated')) {
         alert('Zugriff verweigert');
         window.location.href = 'index.html';
@@ -35,9 +38,14 @@ window.onload = async () => {
             // Convert the JSON string back to an array
             User = JSON.parse(retString);
             console.log("User: ", User.user.name + " " + User.user.id);
-            document.getElementById('userID').innerHTML = User.user.name;
+            
+            // change profile name of menu
+            menuItem1.textContent = User.user.name; 
+            // change profile name of drawer
+            menuItem2.textContent = User.user.name;
          } else {
-            document.getElementById('userID').innerHTML = 'MURX';
+            menuItem1.textContent = 'Error';
+            menuItem2.textContent = 'Error';
          }
         
     }
@@ -66,6 +74,7 @@ window.onload = async () => {
 
     for (let i = 0; i < dbevents.events.length; i++) {
         if (User.user.id === dbevents.events[i].userid ) {
+            dbevents.events[i].eventTextColor = '#000000';
             dbevents.events[i].color='#4CAF50'; // green
             if (dbevents.events[i].groupId != null) {
                 calendar.addEvent(dbevents.events[i]);
@@ -74,6 +83,7 @@ window.onload = async () => {
                     title:  dbevents.events[i].title,
                     start:  dbevents.events[i].start,
                     end:    dbevents.events[i].end,
+                    eventTextColor: '#000000',
                     color:  '#4E95D9', // blue
                     extendedProps: {
                         userid: User.user.id,
@@ -104,6 +114,7 @@ window.onload = async () => {
         }
     }
 
+    /*
     // toolbar actions
     const series_btn = document.getElementById("icon-series");
     series_btn.addEventListener("click", event => {
@@ -149,6 +160,7 @@ window.onload = async () => {
         }
             window.location.href = "./index.html";
     });
+    */
 
     // buttons of modal dialog
     const cancel_btn = document.getElementById("cancelButton");

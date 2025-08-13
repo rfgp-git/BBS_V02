@@ -1,49 +1,51 @@
-html {
-    background-color: rgb(244,244,244)
-}
-
-body {
+#BBS_body {
+    background-image: url('images/BBS_Background.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;  
+    background-size: 800px auto;
+    background-position: center ;
     font-family: 'Roboto', 'sans-serif';
-    padding-top: 20px;
-    margin: 0;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: rgba(0,0,0,0.79);
 }
 
-h1 {
-    font-size: 36px;
-    font-weight: 500;
-}
-
-h2 {
-    font-size: 18px;
-    font-weight: 400;
-}
 
 .bbs-form {
     background-color: white;
     font-weight: 400;
     text-align: left;
-    padding: 40px;
+    padding: 20px;
     border: 1px solid rgba (0,0,0,0.16);
     border-radius: 6px;
-    width: 360px;
+    width: 340px;
+    margin: 0 auto;
+    margin-top: 150px;
+    background-color: rgba(255, 255, 255, 0.8);
 }
 
 .bbs-form h2 {
     text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: rgb(119,34,60);
+}
+
+h2 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: rgb(119,34,60);
 }
 
 .bbs-form input {
     width: 100%;
+    height: 20px;
     margin-bottom: 10px;
 }
 
 .bbs-form label {
-    font-weight: 100;
+    font-weight: 300;
     font-size: 13px;
+    color: rgb(119,34,60);
 }
 
 .form-button {
@@ -54,12 +56,68 @@ h2 {
     border-radius: 6px;
     display: block;
     margin: 0 auto;
+    cursor: pointer;
+}
+
+.form-button:hover {
+    background-color: rgb(209, 113, 34);
+    color: rgb(13, 13, 14);;
 }
 
 .form-toggle {
     text-align: center;
     margin-top: 10px;
     font-size: 14px;
+}
+
+.booking-button {
+    background-color: rgb(84, 146, 222);
+    color: white;
+    width: 200px;
+    height: 60px;
+    border-radius: 6px;
+    display: block;
+    margin: 0 auto;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.booking-button:hover {
+    background-color: rgb(209, 113, 34);
+    color: rgb(13, 13, 14);;
+}
+
+.header p {
+    display: flex;
+    justify-content: center; /* Horizontal centering */
+    align-items: center;    /* Vertical centering */
+    margin-top: 20px;
+    text-align:center;
+    font-size: 22px;
+    font-weight: bold;
+    /*color: rgb(119,34,60);*/
+    color: rgb(220,96,53);
+}
+
+.info p {
+    display: flex;
+    justify-content: center; /* Horizontal centering */
+    align-items: center;    /* Vertical centering */
+    margin-top: 20px;
+    text-align:center;
+    font-size: 18px;
+    font-weight: bold;
+    color: rgb(10, 10, 10);
+}
+
+.footer p {
+    display: flex;
+    justify-content: center; /* Horizontal centering */
+    align-items: center;    /* Vertical centering */
+    margin-top: 450px;
+    text-align:left;
+    font-size: 16px;
+    font-weight: bold;
 }
 
 #error-message {

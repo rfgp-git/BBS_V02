@@ -32,22 +32,6 @@ input {
 }
 
 
-.bbstoolbar {
-    background-color: rgb(255, 255, 255);
-    display: flex;
-    justify-content: space-between;
-  
-    position: absolute;
-    top: 5px;
-    right: 405px;
-    
-    align-items: center;
-    
-    width: 250px;
-    height: 25px;
-    
-}
-
 /* event modal */
 
 #eventModal {
