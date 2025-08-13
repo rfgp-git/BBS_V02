@@ -120,6 +120,24 @@ h2 {
     font-weight: bold;
 }
 
+#bbs_bill {
+    padding: 10px;
+    display: grid;
+    align-items: center;
+}
+
+.mdl-data-table {
+    margin: 10px;
+    table-layout: fixed;
+    width: 50%;
+}
+
+.mdl-button {
+    margin: 10px;
+    margin-left: 50px;
+}
+
+
 #error-message {
     color: rgb(229,99,99);
     font-size: 14px;

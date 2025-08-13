@@ -5,10 +5,16 @@ window.onload = () => {
 
     const username = urlParams.get('username');
 
-    if (username) {
+    if (username == 'logout' ) {
+        // call logout
+        logout(); 
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState(null, '', newUrl);   
+    } else {
         const usernameInput = document.getElementById('username');
         usernameInput.value = username;
     }
+    
 }
 
 document.getElementById('login-button').addEventListener('click', async event => {
@@ -75,3 +81,19 @@ document.getElementById('login-button').addEventListener('click', async event =>
             errmsgDiv.innerHTML=err?.message || 'Login fehlgeschlagen';
         }
 });
+
+async function logout() {
+
+    try {
+            const response = await fetch('api/logout', {
+                method: 'POST',
+                headers: {
+                    'Contetnt-Type': '/application/json'
+                },
+                credentials: 'include'
+            });
+
+        } catch(err) {
+            alert('Logout ist fehlgeschlagen ' + err?.message || 'Unbekannter Fehler');
+        }
+}
