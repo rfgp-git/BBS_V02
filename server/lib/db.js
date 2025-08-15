@@ -1,7 +1,23 @@
 import DBUserController from '../controller/dbbbs_usercontroller.js';
 import DBEventController from '../controller/dbbbs_eventcontroller.js';
+import DBInvoiceController from '../controller/dbbbs_invoicecontroller.js';
 
 let _ = class DB {
+
+    // handling of invoices
+    static saveInvoice(data) {
+        
+        if (data) {
+            //this.localStorage.push(data);
+            //console.log('database local storage:', this.localStorage);
+            const invoicecontroller = new DBInvoiceController();
+            // create Event in DB 
+            const dbinvoiceid = invoicecontroller.dbcreateInvoice(data);
+            return dbinvoiceid;
+        }
+        return false;
+    };
+    
 
     // handling of events
     static saveEvent(data) {

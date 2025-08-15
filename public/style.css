@@ -132,9 +132,17 @@ h2 {
     width: 50%;
 }
 
+.bill_buttonbar {
+    display: flex;
+    gap:20px;
+    align-items: center;
+    width: 50%;
+    margin-left: 10px;
+}
+
 .mdl-button {
     margin: 10px;
-    margin-left: 50px;
+    width: 120px;
 }
 
 

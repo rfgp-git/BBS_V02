@@ -1,6 +1,8 @@
 import express from 'express';
 import User from '../models/user.js';
 import Event from '../models/event.js';
+import Invoice from '../models/invoice.js';
+
 import passport from 'passport';
 import DB from '../lib/db.js';
 import Holidays from 'date-holidays';
@@ -338,6 +340,40 @@ _.post('/getgroupID' ,async (req, res) => {
             code: 500
         });
     }
+});
+
+// POST /saveInvoice
+
+_.post('/saveInvoice',  async (req,res) => {
+    
+    try {
+        console.log("body: ", req.body);
+        
+
+            let invoice = new Invoice();
+            invoice.setInvoiceNo(req.body.Bill_No);
+            invoice.setInvoiceDate(req.body.Bill_Date);
+            invoice.setInvoiceAmount(req.body.Bill_SumTotal);
+            invoice.setInvoicePayment('open');
+            invoice.setInvoiceStatus('open');
+            
+            invoice.setUserID(req.body.Bill_UserID);
+
+            // save the invoice to the database
+            const invoiceid = await invoice.save();
+            invoice.setDBInvoiceID(invoiceid);
+
+            res.status(200).json({
+                timestamp: Date.now(),
+                msg: 'Invoice successfully saved',
+                invoice,
+                code: 200
+            });
+
+        
+    } catch(e) {
+        throw new Error(e);
+    }    
 });
 
 _.post('/getHolidays' ,async (req, res) => {
