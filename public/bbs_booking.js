@@ -676,7 +676,7 @@ async function getEventsfromDB() {
         }
     } catch (err) {
         console.log('error: ', err);
-        alert ('Fehler beim Speichern des Events ' + err.message ? err.message: 'Unbekannter Fehler');
+        alert ('Fehler beim Holen des Events ' + err.message ? err.message: 'Unbekannter Fehler');
     }
 }
 

@@ -353,10 +353,11 @@ _.post('/saveInvoice',  async (req,res) => {
             let invoice = new Invoice();
             invoice.setInvoiceNo(req.body.Bill_No);
             invoice.setInvoiceDate(req.body.Bill_Date);
-            invoice.setInvoiceAmount(req.body.Bill_SumTotal);
             invoice.setInvoicePayment('open');
             invoice.setInvoiceStatus('open');
-            
+            invoice.setInvoiceDrinksTotal(req.body.Bill_DrinkTotal);
+            invoice.setInvoiceChargeTotal(req.body.Bill_ChargeTotal);
+            invoice.setInvoiceAmount(req.body.Bill_SumTotal);
             invoice.setUserID(req.body.Bill_UserID);
 
             // save the invoice to the database
@@ -374,6 +375,57 @@ _.post('/saveInvoice',  async (req,res) => {
     } catch(e) {
         throw new Error(e);
     }    
+});
+
+_.post('/getmyInvoices' ,async (req, res) => {
+
+    try {
+        const userid = req.body.userid;
+        let dbinterface = new DB();
+        const invoices = await dbinterface.getmyInvoices(userid);
+
+        
+        for (let i = 0; i < invoices.length; i++) {
+            console.log("router get my invoices :", invoices[i].inv_no);
+        }
+
+        res.status(200).json({invoices});
+
+    } catch (err) {
+        console.error(new Error(err.message));
+        res.status(500).json({
+            timestamp: Date.now(),
+            msg: 'Failed to get invoices, internal server error',
+            code: 500
+        });
+    }
+});
+
+_.post('/getlastInvoiceNo' ,async (req, res) => {
+    let invoiceno = 0;
+    try {
+        const userid = req.body.userid;
+        let dbinterface = new DB();
+        const result = await dbinterface.getlastInvoiceNo(userid);
+
+        if (result == false ) {
+            invoiceno = 0;
+        } else {
+            invoiceno = result;
+        }
+
+        console.log("router getlastInvoiceNo :", invoiceno);
+
+        res.status(200).json(invoiceno);
+
+    } catch (err) {
+        console.error(new Error(err.message));
+        res.status(500).json({
+            timestamp: Date.now(),
+            msg: 'Failed to get invoice number, internal server error',
+            code: 500
+        });
+    }
 });
 
 _.post('/getHolidays' ,async (req, res) => {

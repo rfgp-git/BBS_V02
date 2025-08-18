@@ -6,6 +6,7 @@
     document.getElementById('transfer_Bill').onclick = btn_transfer_clicked;
     document.getElementById('paypal_Bill').onclick = btn_paypal_clicked;
     document.getElementById('save_Bill').onclick = btn_save_clicked;
+    document.getElementById('new_Bill').onclick = btn_new_clicked;
 
     // invoice total data
     let objinvoice   = {};
@@ -56,7 +57,7 @@
         }
     }
 
-    function createHeaderTableData() {
+    async function createHeaderTableData() {
         const tbl_header = document.getElementById('header_table');
         // empty table
         for(let i = 1; i < tbl_header.rows.length;){
@@ -72,8 +73,10 @@
         console.log(formattedDate); // Example: "2025-07-24" will be displayed as 24.07.2025
         //let inputdate="<input type=" + '"' + "date" + '"' + "id=" + '"' + "currentDate" + '"' + "value=" + '"' + formattedDate + '"' + "onchange=" + "saveDate(this)" + ">"
 
+        let invoiceno = await generateInvoiceNo(User.user.id);
+
         let row = "<tr>" +
-                        "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + "2025_001" + "</td>" +
+                        "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + invoiceno + "</td>" +
                         "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + User.user.name + "</td>" +
                         //"<td " + "class=" + "mdl-data-table__cell--non-numeric contenteditable" + "=true" +">" + inputdate + "</td>" +
                         "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + formattedDate + "</td>" +
@@ -200,11 +203,17 @@
     }
 
     function btn_save_clicked() {
-        alert("Btn save clicked");
+        //alert("Btn save clicked");
         
         gettotalAmounts();
 
         saveInvoicetoDB(objinvoice);
+    }
+
+    function btn_new_clicked() {
+        
+        location.reload();
+        
     }
 
     function btn_transfer_clicked() {
@@ -365,6 +374,47 @@ async function saveInvoicetoDB(invoicedata) {
         alert ('Fehler beim Speichern der Rechnung ' + err.message ? err.message: 'Unbekannter Fehler');
     }
 }
+
+async function generateInvoiceNo(userid) {
+    let lastinvoiceno;
+    try {
+        const response = await fetch('api/getlastInvoiceNo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                userid
+            })
+        });
+
+        if (response.ok) {
+            
+        lastinvoiceno = await response.json();
+        
+        let new_no = lastinvoiceno + 1;
+        
+        const currentYear = new Date().getFullYear();
+
+        let new_invoice_no = currentYear + '_' +  User.user.name + '-' + new_no.toString().padStart(3, '0');
+
+        return new_invoice_no;
+
+        } else {
+            if (!response.ok) {
+                const { errors } = await response.json();
+                let testerr=errors[0].msg;
+                throw new Error(testerr);
+            }
+        }
+    } catch (err) {
+        console.log('error: ', err);
+        alert ('Fehler beim Einlesen der Rechnungen ' + err.message ? err.message: 'Unbekannter Fehler');
+    }
+}
+
+
 
 function btn_paypal_clicked() {
     alert("PayPal");

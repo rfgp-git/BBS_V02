@@ -17,6 +17,34 @@ let _ = class DB {
         }
         return false;
     };
+
+    // get all invoices
+    async getmyInvoices(userID) {
+        let invoices = [];
+                
+        const invoicecontroller = new DBInvoiceController();
+        
+        invoices = await invoicecontroller.dbgetmyInvoices(userID);
+        console.log('DB.getmyInvoices: ',invoices);
+        
+        return invoices;
+        
+    };
+
+    // get last invoice
+    async getlastInvoiceNo(userID) {
+        let invoiceno;
+                
+        const invoicecontroller = new DBInvoiceController();
+        
+        invoiceno = await invoicecontroller.dbgetCurrentNumberOfInvoices(userID);
+        console.log('DB.getlastInvoiceNo: ',invoiceno);
+        
+        return invoiceno;
+        
+    };
+
+
     
 
     // handling of events

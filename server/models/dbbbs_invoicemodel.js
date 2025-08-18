@@ -10,13 +10,25 @@ const bbsInvoiceSchema = new Schema({
     inv_date : {
         type: String
     },
-    inv_amount: {
-        type: String
-    },
     inv_payment: {
         type: String
     },
     inv_status: {
+        type: String
+    },
+    inv_drink_total: {
+        type: String
+    },
+    inv_charge_total: {
+        type: String
+    },
+    inv_drinks_total: {
+        type: String
+    },
+    inv_charge_total: {
+        type: String
+    },
+    inv_amount: {
         type: String
     },
     userid: {
@@ -26,5 +38,4 @@ const bbsInvoiceSchema = new Schema({
 });
 
 const dbbbsinvoice = mongoose.model('Invoice', bbsInvoiceSchema);
-//module.exports = dbbbsuser;
 export default dbbbsinvoice;

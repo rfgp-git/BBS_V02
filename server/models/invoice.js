@@ -5,13 +5,15 @@ let _ = class Invoice {
 
     constructor() {
         this.created     = Date.now();
-        this.inv_no      = null,
-        this.inv_date    = null,
-        this.inv_amount  = null,
-        this.inv_payment = null;
-        this.inv_status  = null;
-        this.userid      = null;
-        this.invoiceid   = null;
+        this.inv_no           = null,
+        this.inv_date         = null,
+        this.inv_payment      = null;
+        this.inv_status       = null;
+        this.inv_drinks_total = null,
+        this.inv_charge_total = null,
+        this.inv_amount       = null,
+        this.userid           = null;
+        this.invoiceid        = null;
     }
 
     // save event to the database
@@ -37,16 +39,24 @@ let _ = class Invoice {
         this.inv_date=date;
     }
 
-    setInvoiceAmount(amount) {
-        this.inv_amount=amount;
-    }
-
     setInvoicePayment(payment) {
         this.inv_payment=payment;
     }
 
     setInvoiceStatus(status) {
         this.inv_status=status;
+    }
+
+    setInvoiceDrinksTotal(drinks) {
+        this.inv_drinks_total=drinks;
+    }
+
+    setInvoiceChargeTotal(charge) {
+        this.inv_charge_total=charge;
+    }
+
+    setInvoiceAmount(amount) {
+        this.inv_amount=amount;
     }
 
     setUserID(userid) {

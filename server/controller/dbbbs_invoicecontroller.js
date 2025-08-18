@@ -7,12 +7,14 @@ let _ = class DBInvoiceController {
             let dbinvoice;
             
             dbinvoice = new dbbbsinvoice({
-                inv_no:      data.inv_no,
-                inv_date:    data.inv_date,
-                inv_amount:  data.inv_amount,
-                inv_payment: data.inv_payment,
-                inv_status:  data.inv_status,
-                userid:      data.userid,
+                inv_no:             data.inv_no,
+                inv_date:           data.inv_date,
+                inv_payment:        data.inv_payment,
+                inv_status:         data.inv_status,
+                inv_drinks_total:   data.inv_drinks_total,
+                inv_charge_total:   data.inv_charge_total,
+                inv_amount:         data.inv_amount,
+                userid:             data.userid,
                 
             });
            
@@ -36,24 +38,44 @@ let _ = class DBInvoiceController {
             console.log(e.message);
         }
     }
+    */
 
-
-    async dbgetEvents() {
-        let foundevents = [];
+    async dbgetCurrentNumberOfInvoices(userID) {
+        let count=null;
         try {
-            foundevents = await dbbbsevent.find();
-            if (foundevents.length != 0) {
-                console.log('DBEventController.dbfindEvents:', foundevents);
-                return foundevents;
+            // get all invoices of a special user
+            //foundinvoice = await dbbbsinvoice.findOne({userid: userID}).sort({seq_no:-1});
+            count = await dbbbsinvoice.countDocuments({ userid: userID });
+            
+            if (count != null) {
+                console.log('DBEventController.dbgetCurrentNumberOfInvoices:', count);
+                return count;
             } else {
                 return false;
             }
-            
+           
+        } catch (e) {
+            console.log(e.message);  
+        }
+    }
+
+    async dbgetmyInvoices(userID) {
+        let foundinvoices = [];
+        try {
+            // get all invoices
+                foundinvoices = await dbbbsinvoice.find({userid: userID});
+                if (foundinvoices.length != 0) {
+                    console.log('DBEventController.dbfindmyInvoices:', foundinvoices);
+                    return foundinvoices;
+                } else {
+                    return false;
+                }
+
         } catch (e) {
             console.log(e.message);  
         }
         
-    }*/
+    }
 }
 
 export default _;
