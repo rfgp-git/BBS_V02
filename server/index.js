@@ -10,11 +10,13 @@ import mongoose from 'mongoose';
 import 'dotenv/config'
 import path from 'path';
 import { fileURLToPath } from 'url';
+import * as dotenv from 'dotenv';
 
 // Configure the express server
 const app = express();
 const port = process.env.PORT || 3000;
 const dbinterface = new DB();
+dotenv.config();
 
 let _ = {};
 
@@ -32,17 +34,12 @@ _.start = () => {
 
     try {
         const apiKey = process.env.API_KEY;
-        //const apiKey = process.env.DB_CONNECT_KEY; //Secrets from github
         if (apiKey == undefined){
             console.log("Error getting API Key ");
         }
-        
-        const dbconnectstring= 'mongodb+srv://' + apiKey + '@cluster0.mehevcm.mongodb.net/testdb';
 
-        //mongoose.connect('mongodb://localhost:27017/testdb');
-        
-        
-        //mongoose.connect('mongodb+srv://petertyrach:u5mwg5Pk3Q4pKchy@cluster0.mehevcm.mongodb.net/testdb');
+        const dbconnectstring = process.env.DB_URI;
+
         mongoose.connect(dbconnectstring);
         const db = mongoose.connection;
 
@@ -51,7 +48,11 @@ _.start = () => {
         });
 
         db.once('open', () => {
-            console.log('Database connection established');
+            if (dbconnectstring.includes('mongodb.net')) {
+                console.log('Database remote connection established');
+            } else {
+                console.log('Database local connection established');
+            }
         })
 
     } catch(e) {
