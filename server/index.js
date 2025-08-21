@@ -39,11 +39,11 @@ _.start = () => {
         
         const dbconnectstring= 'mongodb+srv://' + apiKey + '@cluster0.mehevcm.mongodb.net/testdb';
 
-        mongoose.connect('mongodb://localhost:27017/testdb');
+        //mongoose.connect('mongodb://localhost:27017/testdb');
         
         
         //mongoose.connect('mongodb+srv://petertyrach:u5mwg5Pk3Q4pKchy@cluster0.mehevcm.mongodb.net/testdb');
-        //mongoose.connect(dbconnectstring);
+        mongoose.connect(dbconnectstring);
         const db = mongoose.connection;
 
         db.on('error', err => {
