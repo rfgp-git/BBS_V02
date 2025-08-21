@@ -114,53 +114,6 @@ window.onload = async () => {
         }
     }
 
-    /*
-    // toolbar actions
-    const series_btn = document.getElementById("icon-series");
-    series_btn.addEventListener("click", event => {
-        alert("Series events to be implemented"); 
-    });
-
-    const help_btn = document.getElementById("icon-help");
-    help_btn.addEventListener("click", event => {
-        alert("Help text to be implemented"); 
-    });
-
-    const remove_btn = document.getElementById("icon-remove");
-    remove_btn.addEventListener("click", async event => {
-         if (confirm('Sollen alle Reservierung gelöscht werden ?')) {
-            for (let i = 0; i < dbevents.events.length; i++) {
-                if (User.user.id === dbevents.events[i].userid ) {
-                    await removeEventfromDB(dbevents.events[i]._id);
-                } 
-            }
-            location.reload();
-        }
-    });
-
-    const profile_btn = document.getElementById("icon-profile");
-    profile_btn.addEventListener("click", event => {
-        window.location.href = "./profile.html";
-    });
-
-    const logout_btn = document.getElementById("icon-logout");
-    logout_btn.addEventListener("click", async (event) => {
-        try {
-            const response = await fetch('api/logout', {
-                method: 'POST',
-                headers: {
-                    'Contetnt-Type': '/application/json'
-                },
-                credentials: 'include'
-            });
-
-        } catch(err) {
-            alert('Logout ist fehlgeschlagen ' + err?.message || 'Unbekannter Fehler');
-            window.location.href = 'index.html';
-        }
-            window.location.href = "./index.html";
-    });
-    */
 
     // buttons of modal dialog
     const cancel_btn = document.getElementById("cancelButton");
@@ -419,7 +372,7 @@ async function deleteEvent(event) {
                                                     dbevents.events[exEventIndex].duration,
                                                     existingEvent.event.startStr
                                                 );
-            // reload paege
+            // reload page
             location.reload();
         }
         

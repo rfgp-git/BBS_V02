@@ -55,7 +55,8 @@
                     <h4>Rechnungen</h4>
                     <thead>
                     <tr>
-                        <th class="mdl-data-table__cell--non-numeric"><b>Benutzer</b></th>
+                        <th class="mdl-data-table__cell--non-numeric"><b>Check</b></th>
+                        <th class="mdl-data-table__cell--non-numeric"><b>Kontakt</b></th>
                         <th class="mdl-data-table__cell--non-numeric"><b>Nummer</b></th>
                         <th class="mdl-data-table__cell--non-numeric"><b>Datum</b></th>
                         <th class="mdl-data-table__cell--non-numeric" ><b>Zahlungsart</b></th>
@@ -67,6 +68,11 @@
                     </thead>
                     <tbody id = "invoice_table_body"></tbody>
                 </table>
+                <div class="bill_buttonbar">
+                    <button type = "button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"  id="payin_cash">Bar</button>
+                    <button type = "button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"  id="transfer_Bill">Transfer</button>
+                    <button type = "button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"  id="paypal_Bill">PayPal</button>
+                </div>
             </div>
         </main>
     </div>

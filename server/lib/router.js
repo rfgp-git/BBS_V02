@@ -12,6 +12,14 @@ import jsonclosedDays from '../bbs_closed_days.json' with { type: 'json' };
 import  {body, validationResult, checkSchema, matchedData } from 'express-validator';
 import {UserValidationSchema} from '../utils/validationSchemas.js';
 
+import pdfpckg from '@pdftron/pdfnet-node';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import nodemailer from 'nodemailer';
+import 'dotenv/config';
+
 
 
 let _ = express.Router();
@@ -29,6 +37,45 @@ const reqireAuth = (req, res, next) => {
         });
     }
 }
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
+// PDF replacer
+const { PDFNet } = pdfpckg;
+
+// e-mail settings
+
+// Create a test account or replace with real credentials.
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.USER,
+    pass: process.env.APP_PASSWORD
+  },
+  //debug: true, // Enable debug output
+  //logger: true, // Log information
+});
+
+if (transporter.options.auth.user == undefined) {
+    console.log('Environment Error');
+}
+
+const sendMail = async (transporter, mailOptions) => {
+    try {
+
+        await transporter.sendMail(mailOptions);
+        console.log('E-Mail sent successfully to ', mailOptions.to);
+        console.log('with attachment', mailOptions.attachments);
+
+    } catch(error) {
+        console.error(error);
+    }
+} 
 
 
 // POST /register
@@ -175,6 +222,7 @@ _.get('/user', reqireAuth ,async (req, res) => {
         res.status(200).json({
             user: {
                 id: req.user.id,
+                contact: user.contact,
                 email: user.email,
                 name: user.username
             }
@@ -426,6 +474,110 @@ _.post('/getlastInvoiceNo' ,async (req, res) => {
             code: 500
         });
     }
+});
+
+_.post('/generateInvoice' ,async (req, res) => {
+    
+    console.log("body: ", req.body);
+    const invoiceparam = req.body;
+
+    const inputPath = path.resolve(__dirname, '../files/' + 'BBS_Invoice_Template_' + invoiceparam.Bill_Payment + '.pdf');
+    const pdftarget = 'BBS_Rechnung_' + invoiceparam.Bill_No + '.pdf';
+    const outputPath = path.resolve(__dirname, '../files/' + pdftarget);
+
+    console.log('input:', inputPath );
+    console.log('output:', outputPath );
+
+    const replaceText = async () => {
+        const pdfdoc = await PDFNet.PDFDoc.createFromFilePath(inputPath);
+        await pdfdoc.initSecurityHandler();
+        const replacer = await PDFNet.ContentReplacer.create();
+        const page = await pdfdoc.getPage(1);
+
+        await replacer.addString('BBS_User', invoiceparam.Bill_Recipient);
+        await replacer.addString('BBS_Contact', invoiceparam.Bill_Contact);
+
+        await replacer.addString('BBS_BillNo', invoiceparam.Bill_No);
+        //await replacer.addString('BBS_BillDate', new Date(Date.now()).toLocaleDateString());
+        await replacer.addString('BBS_BillDate', invoiceparam.Bill_Date);
+
+        await replacer.addString('BBS_DrinkTotal', invoiceparam.Bill_DrinkTotal + " €");
+        await replacer.addString('BBS_CharTotal', invoiceparam.Bill_ChargeTotal + " €");
+        await replacer.addString('BBS_SumTotal', invoiceparam.Bill_SumTotal + " €");
+
+        await replacer.process(page);
+
+        pdfdoc.save(outputPath, PDFNet.SDFDoc.SaveOptions.e_linearized);
+
+        // mail options settings
+
+        const mailOptions = {
+            from: {
+                name: 'KV-Sankt-Kunigund',
+                address: process.env.USER
+            },
+            to: 'peter.tyrach@googlemail.com',
+            subject: 'BBS Rechnung',
+            text: 'Kegelbahn Schnaittach',
+            html: "Rechnung für die Kegelbahn in Schnaittach",
+            attachments: [{
+                filename: pdftarget,
+                //path: path.join (__dirname, '../files/BBS_Rechnung_Alle Neune_2025_001.pdf'),
+                path: outputPath,
+                contentType: 'application/pdf'
+            }]
+        }
+        sendMail(transporter, mailOptions);
+    }
+
+    PDFNet.runWithCleanup(replaceText, 'demo:1753519859856:618bec4e03000000009c1b87972621733d8b5282205f959cbc6a274c24').then(() => {
+        res.status(200).json({
+            timestamp: Date.now(),
+            msg: 'pdf file successfully created',
+            outputPath,
+            code: 200
+        });
+    }).catch(err => {
+        res.status(404).json({
+            timestamp: Date.now(),
+            msg: 'Error by creating pdf file',
+            outputPath,
+            code: 404
+        });
+        throw new Error(err);
+    });
+});
+
+_.post('/updateInvoice',  async (req,res) => {
+    
+    try {
+            console.log("updateInvoice body: ", req.body);
+
+            // save the invoice payment and status to the database
+            const inv_no = req.body.inv_no; 
+            const inv_payment = req.body.inv_payment;
+            const inv_status = req.body.inv_status;  
+            
+            const result= await DB.updateInvoice(inv_no, inv_payment, inv_status);
+            if (result) { 
+                res.status(200).json({
+                timestamp: Date.now(),
+                msg: 'Invoice successfully updated',
+                inv_no,
+                code: 200
+                });
+            } else {
+                res.status(404).json({
+                    timestamp: Date.now(),
+                    msg: 'Invoice not updated',
+                    inv_no,
+                    code: 404
+                });
+            }
+        
+        } catch(e) {
+            throw new Error(e);
+        }
 });
 
 _.post('/getHolidays' ,async (req, res) => {

@@ -44,8 +44,21 @@ let _ = class DB {
         
     };
 
-
-    
+    // update invoice
+    static async updateInvoice(inv_no, inv_payment, inv_status) {
+        
+        if (inv_no) {
+            const invoicecontroller = new DBInvoiceController();
+            // update invoice in DB 
+            const result = await invoicecontroller.dbupdateInvoice(inv_no, inv_payment, inv_status);
+            if (result == 0) {
+                return false;
+            } else {
+                return inv_no;
+            }
+        }
+        return false;
+    };
 
     // handling of events
     static saveEvent(data) {

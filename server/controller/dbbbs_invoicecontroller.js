@@ -76,6 +76,27 @@ let _ = class DBInvoiceController {
         }
         
     }
+
+    async dbupdateInvoice(inv_no, inv_payment, inv_status ) {
+        try {
+            const dbinvoice = await dbbbsinvoice.findOne({inv_no: inv_no} );
+            
+            if (inv_payment != '') {
+                dbinvoice.inv_payment = inv_payment;
+            }
+
+            if (inv_status != '') {
+                dbinvoice.inv_status = inv_status;
+            }
+
+            dbinvoice.save();
+
+            console.log('Invoice updated', inv_no);
+            return inv_no;
+        } catch(e) {
+            console.log(e.message);
+        }
+    }
 }
 
 export default _;

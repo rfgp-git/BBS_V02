@@ -33,7 +33,10 @@ _.start = () => {
     try {
         const apiKey = process.env.API_KEY;
         //const apiKey = process.env.DB_CONNECT_KEY; //Secrets from github
-        console.log("Your API Key is:", apiKey);
+        if (apiKey == undefined){
+            console.log("Error getting API Key ");
+        }
+        
         const dbconnectstring= 'mongodb+srv://' + apiKey + '@cluster0.mehevcm.mongodb.net/testdb';
 
         mongoose.connect('mongodb://localhost:27017/testdb');

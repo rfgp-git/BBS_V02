@@ -3,8 +3,7 @@
     const { jsPDF } = window.jspdf;
     
     let drinksum = 0; // memorize subtotal
-    document.getElementById('transfer_Bill').onclick = btn_transfer_clicked;
-    document.getElementById('paypal_Bill').onclick = btn_paypal_clicked;
+    
     document.getElementById('save_Bill').onclick = btn_save_clicked;
     document.getElementById('new_Bill').onclick = btn_new_clicked;
 
@@ -216,14 +215,7 @@
         
     }
 
-    function btn_transfer_clicked() {
-        //alert("Btn transfer clicked");
-        
-        gettotalAmounts();
-
-        generateInvoice(objinvoice);
-        
-    }
+    
 
     function gettotalAmounts() {
         //get data of header table
@@ -312,7 +304,7 @@
                         "Bill_No":          ainvheader[0],
                         "Bill_Recipient":   ainvheader[1],
                         "Bill_UserID":      User.user.id,
-                        "Bill_Contact":     'Volker Hofmeier',
+                        "Bill_Contact":     User.user.contact,
                         "Bill_Date":        ainvheader[2],
                         "Bill_DrinkTotal":  drink_total,
                         "Bill_ChargeTotal": charge_total,
@@ -320,33 +312,6 @@
         }
 
     }
-
-    async function generateInvoice(invoicedata) {
-        console.log('invoice: ', invoicedata); 
-     
-        try {
-        
-        const response = await fetch('generateInvoice', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(invoicedata)
-        });
-
-        if (!response.ok) {
-            const { errors } = await response.json();
-            let testerr=errors[0].msg;
-            throw new Error(testerr);
-        } else {
-            alert("Rechnung wurde per E-Mail versandt !")
-        }
-
-    } catch (err) {
-        console.log('error: ', err);
-        alert ('Fehler beim Erzeugen der PDF Datei ' + err.message ? err.message: 'Unbekannter Fehler');
-    }
-}
 
 async function saveInvoicetoDB(invoicedata) {
         console.log('invoice: ', invoicedata); 
@@ -414,42 +379,6 @@ async function generateInvoiceNo(userid) {
     }
 }
 
-
-
-function btn_paypal_clicked() {
-    alert("PayPal");
-    gettotalAmounts();
-
-    payperPayPal(objinvoice);
-}
-
-async function payperPayPal(invoicedata) {
-        console.log('paypal: ', invoicedata); 
-     
-        try {
-        
-        const response = await fetch('paypal', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(invoicedata)
-        });
-
-        if (!response.ok) {
-            const { errors } = await response.json();
-            let testerr=errors[0].msg;
-            throw new Error(testerr);
-        } else {
-            console.log("Rechnung wurde an PayPal transferiert !");
-        }
-
-    } catch (err) {
-        console.log('error: ', err);
-        alert ('Fehler beim Transfer zu PayPal ' + err.message ? err.message: 'Unbekannter Fehler');
-    }
-}
-
 function setUser() {
     
     let retString = localStorage.getItem("ActiveUser");
@@ -472,14 +401,9 @@ function setUser() {
 }
 
 function disableButtons(flag) {
-  let button1 = document.getElementById("payin_cash");
-  let button2 = document.getElementById("transfer_Bill");
-  let button3 = document.getElementById("paypal_Bill");
+  
   let button4 = document.getElementById("reserve");
 
-  button1.disabled = flag;
-  button2.disabled = flag;
-  button3.disabled = flag;
   button4.disabled = true;
   
 }
