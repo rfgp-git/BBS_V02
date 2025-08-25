@@ -19,6 +19,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import nodemailer from 'nodemailer';
 import 'dotenv/config';
+import  paypal from '../services/paypal.js';
 
 
 
@@ -94,7 +95,7 @@ _.post('/register', checkSchema(UserValidationSchema), async (req,res) => {
             user.setContactPerson(data.contactperson);
             user.setPhoneNo(data.phone);
             user.setEMail(data.email);
-            if (data.username != 'Admin') {
+            if (data.username != 'Administrator') {
                 user.setUserRole('Bowler');
             } else {
                 user.setUserRole('Admin');
@@ -578,6 +579,19 @@ _.post('/updateInvoice',  async (req,res) => {
         } catch(e) {
             throw new Error(e);
         }
+});
+
+_.post('/paypal', async (req,res) => {
+    
+    const invoiceparam = req.body;
+
+    try {
+        const url = paypal.createOrder(invoiceparam.Bill_No, invoiceparam.Bill_SumTotal);
+        res.redirect(url);
+
+    } catch (error) {
+        res.send('Error: ' + error);
+    }
 });
 
 _.post('/getHolidays' ,async (req, res) => {

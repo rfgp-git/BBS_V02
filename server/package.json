@@ -10,6 +10,7 @@
   "description": "",
   "dependencies": {
     "@pdftron/pdfnet-node": "^11.6.0",
+    "axios": "^1.11.0",
     "bcrypt": "^5.1.1",
     "cookie-session": "^2.1.0",
     "date-holidays": "^3.24.3",

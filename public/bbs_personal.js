@@ -4,7 +4,7 @@ let myinvoices = [];
 
 document.getElementById('payin_cash').onclick = btn_cash_clicked;
 document.getElementById('transfer_Bill').onclick = btn_transfer_clicked;
-//document.getElementById('paypal_Bill').onclick = btn_paypal_clicked;
+document.getElementById('paypal_Bill').onclick = btn_paypal_clicked;
 
 function init() {
 
@@ -113,9 +113,18 @@ async function btn_transfer_clicked() {
     
 }
 
+async function btn_paypal_clicked() {
+
+    triggerInvoice('paypal');
+    
+}
+
+
+
 async function triggerInvoice(payment) {
 
     objinvoice = {};
+    let result = false;
 
     let iTable = document.getElementById('invoice_table');
 
@@ -135,7 +144,11 @@ async function triggerInvoice(payment) {
                     "Bill_Recipient":   User.user.name,
                     "Bill_Status":      'in progress',
             }
-            let result=await generateInvoice(objinvoice);
+            if (payment == 'paypal') {
+                result = await generateInvoicePayPal(objinvoice);
+            } else {
+                result = await generateInvoice(objinvoice);                
+            }
             // change the payment and the status
             if (result == true) {
                 await updateInvoice(objinvoice.Bill_No, objinvoice.Bill_Payment, objinvoice.Bill_Status );
@@ -172,6 +185,35 @@ async function generateInvoice(invoicedata) {
     } catch (err) {
         console.log('error: ', err);
         alert ('Fehler beim Erzeugen der PDF Datei ' + err.message ? err.message: 'Unbekannter Fehler');
+    }
+}
+
+async function generateInvoicePayPal(invoicedata) {
+        console.log('invoice: ', invoicedata); 
+     
+        try {
+        
+        const response = await fetch('api/paypal', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(invoicedata)
+        });
+
+        if (!response.ok) {
+            const { errors } = await response.json();
+            let testerr=errors[0].msg;
+            throw new Error(testerr);
+            return false;
+        } else {
+            alert("Bezahlung erfolgt über PayPal !");
+            return true;
+        }
+
+    } catch (err) {
+        console.log('error: ', err);
+        alert ('Fehler bei der Nutzung der PayPal API ' + err.message ? err.message: 'Unbekannter Fehler');
     }
 }
 
