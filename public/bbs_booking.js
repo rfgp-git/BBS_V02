@@ -147,6 +147,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         center: 'title',
         right: 'timeGridWeek,timeGridDay,dayGridMonth,listMonth'
         },
+        titleFormat: { // Customizing the title format
+            month: 'short', // Full month name
+            year: 'numeric', // Full year
+            day: 'numeric' // Day of the month
+        },
         buttonText: {
             today: 'Heute',
             month: 'Monat',
@@ -295,6 +300,7 @@ function openModalDialog(event) {
     if (processingMode == MODE.UPDATE) {
         document.getElementById("modalTitle").textContent="Reservierung aktualisieren/löschen";
         document.getElementById("submitButton").value="Aktualisieren";
+        document.getElementById("deleteButton").style.display = '';
         
         console.log("Title: ", event.event._def.title );
         

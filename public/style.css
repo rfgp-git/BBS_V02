@@ -122,6 +122,8 @@ h2 {
 
 #bbs_bill {
     padding: 10px;
+    overflow: scroll; 
+    overflow: auto;
     display: grid;
     align-items: center;
 }
@@ -129,14 +131,14 @@ h2 {
 .mdl-data-table {
     margin: 10px;
     table-layout: fixed;
-    width: 60%;
+    width: 70%;
 }
 
 .bill_buttonbar {
     display: flex;
     gap:20px;
     align-items: center;
-    width: 50%;
+    width: 70%;
     margin-left: 10px;
 }
 

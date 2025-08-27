@@ -46,7 +46,8 @@ input {
     z-index: 10;
     padding: 20px;
     width: 450px;
-    min-width: 250px;
+    /* min-width: 250px; */
+    max-width: 70%;
 }
 
 #errors {
@@ -85,16 +86,20 @@ input {
 }
 
 #eventControls {
-    margin: 25px 0px 10px 0px;
+   margin: 25px 0px 10px 0px;
+
+       
 }
 
 .button {
-    padding: 10px 20px;
+    padding: 10px 20px 10px 10px;
     background-color: var(--color-blue);
     color: white;
     cursor: pointer;
+    width: 100px;
     margin-right: 12px;
     border-radius: 2px;
+    text-align: center;
 }
 
 #deleteButton {

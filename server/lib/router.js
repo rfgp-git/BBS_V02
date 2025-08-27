@@ -400,6 +400,7 @@ _.post('/saveInvoice',  async (req,res) => {
         
 
             let invoice = new Invoice();
+            invoice.setInvoiceContact(req.body.Bill_Contact);
             invoice.setInvoiceNo(req.body.Bill_No);
             invoice.setInvoiceDate(req.body.Bill_Date);
             invoice.setInvoicePayment('open');
@@ -449,6 +450,27 @@ _.post('/getmyInvoices' ,async (req, res) => {
         });
     }
 });
+
+_.post('/getallInvoices' ,async (req, res) => {
+
+    try {
+        let dbinterface = new DB();
+        const invoices = await dbinterface.getallInvoices();
+
+        console.log("getalInvoices total :", invoices.length);
+
+        res.status(200).json({invoices});
+
+    } catch (err) {
+        console.error(new Error(err.message));
+        res.status(500).json({
+            timestamp: Date.now(),
+            msg: 'Failed to get all invoices, internal server error',
+            code: 500
+        });
+    }
+});
+
 
 _.post('/getlastInvoiceNo' ,async (req, res) => {
     let invoiceno = 0;

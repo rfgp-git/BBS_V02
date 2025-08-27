@@ -5,6 +5,7 @@ let _ = class Invoice {
 
     constructor() {
         this.created     = Date.now();
+        this.inv_contact      = null,
         this.inv_no           = null,
         this.inv_date         = null,
         this.inv_payment      = null;
@@ -29,6 +30,10 @@ let _ = class Invoice {
         
         DB.deleteInvoice(invoiceID);
        
+    }
+
+    setInvoiceContact(contact) {
+        this.inv_contact=contact;
     }
 
     setInvoiceNo(no) {

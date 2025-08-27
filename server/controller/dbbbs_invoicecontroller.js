@@ -7,6 +7,7 @@ let _ = class DBInvoiceController {
             let dbinvoice;
             
             dbinvoice = new dbbbsinvoice({
+                inv_contact:        data.inv_contact,
                 inv_no:             data.inv_no,
                 inv_date:           data.inv_date,
                 inv_payment:        data.inv_payment,
@@ -27,18 +28,6 @@ let _ = class DBInvoiceController {
         }
     }
 
-
-    /*
-    async dbdeleteEvent(eventID) {
-        try {
-            const result = await dbbbsevent.deleteOne({_id: eventID} );
-            console.log('Event removed', result.deletedCount);
-            return result.deletedCount;
-        } catch(e) {
-            console.log(e.message);
-        }
-    }
-    */
 
     async dbgetCurrentNumberOfInvoices(userID) {
         let count=null;
@@ -62,10 +51,28 @@ let _ = class DBInvoiceController {
     async dbgetmyInvoices(userID) {
         let foundinvoices = [];
         try {
-            // get all invoices
+            // get my invoices
                 foundinvoices = await dbbbsinvoice.find({userid: userID});
                 if (foundinvoices.length != 0) {
                     console.log('DBEventController.dbfindmyInvoices:', foundinvoices);
+                    return foundinvoices;
+                } else {
+                    return false;
+                }
+
+        } catch (e) {
+            console.log(e.message);  
+        }
+        
+    }
+
+    async dbgetallInvoices() {
+        let foundinvoices = [];
+        try {
+            // get all invoices
+                foundinvoices = await dbbbsinvoice.find();
+                if (foundinvoices.length != 0) {
+                    console.log('DBEventController.dbfindallInvoices total :', foundinvoices.length);
                     return foundinvoices;
                 } else {
                     return false;

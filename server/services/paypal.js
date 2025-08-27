@@ -24,6 +24,7 @@ async function createOrder(invoiceno, fee) {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + accessToken
         },
+        /*
         data: JSON.stringify({
             intent: 'CAPTURE',
             purchase_units: [
@@ -60,8 +61,8 @@ async function createOrder(invoiceno, fee) {
                 user_action: 'PAY_NOW',
                 brand_name: 'BBS Rechnung'
             }
-        })
-    })
+        })*/
+    });
 
     return response.data.links.find(link => link.rel === 'approve').href
 }

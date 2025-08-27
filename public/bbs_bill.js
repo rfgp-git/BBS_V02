@@ -21,7 +21,6 @@
 
         setUser();
 
-        disableButtons(true);
 
         createHeaderTableData();
 
@@ -400,12 +399,5 @@ function setUser() {
     }
 }
 
-function disableButtons(flag) {
-  
-  let button4 = document.getElementById("reserve");
-
-  button4.disabled = true;
-  
-}
 
 

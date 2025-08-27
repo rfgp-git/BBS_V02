@@ -94,7 +94,7 @@
         </div>
         
         <div id="eventControls">
-            <input type="submit" value="Anlegen" class="button" id="submitButton">
+            <input type="button" value="Anlegen" class="button" id="submitButton">
             <input type="button" value="Abbrechen" class="button" id="cancelButton">
             <input type="button" value="Löschen" class="button" id="deleteButton">
         </div>
@@ -137,6 +137,22 @@
       .fc-day-sat, .fc-day-sun {
           background-color: #F2F2F2 !important;
       }
+
+      .fc-toolbar-title {
+        font-size: 10px; /* Adjust font size */
+        /*
+        font-weight: bold; 
+        color: #007bff; 
+        text-transform: uppercase; 
+        */
+        text-align: center; /* Center align the text */
+      }
+
+      @media (max-width: 768px) {
+        .fc-toolbar-title {
+        display: none;
+      }
+}
       
     </style>
     

@@ -4,6 +4,9 @@ const Schema=mongoose.Schema;
 
 const bbsInvoiceSchema = new Schema({
 
+    inv_contact : {
+        type: String
+    },
     inv_no : {
         type: String
     },

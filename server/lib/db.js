@@ -18,7 +18,7 @@ let _ = class DB {
         return false;
     };
 
-    // get all invoices
+    // get my invoices
     async getmyInvoices(userID) {
         let invoices = [];
                 
@@ -26,6 +26,18 @@ let _ = class DB {
         
         invoices = await invoicecontroller.dbgetmyInvoices(userID);
         console.log('DB.getmyInvoices: ',invoices);
+        
+        return invoices;
+        
+    };
+
+    // get my invoices
+    async getallInvoices() {
+        let invoices = [];
+                
+        const invoicecontroller = new DBInvoiceController();
+        
+        invoices = await invoicecontroller.dbgetallInvoices();
         
         return invoices;
         
