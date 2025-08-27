@@ -113,19 +113,24 @@ _.post('/register', checkSchema(UserValidationSchema), async (req,res) => {
                 //return res.status(400).send('Sonderzeichen mehrfach verwendet')
             } else {
                 // save the user to the database
-                user.save();
-                console.log('parseUser');
-                let record = await user.parseUser();
+                const result = await user.save();
+                if (result) {
+                    let record = await user.parseUser(); // remove user details like password
 
-                res.status(200).json({
-                    timestamp: Date.now(),
-                    msg: 'Successfully registered',
-                    record,
-                    code: 200
-                });
-
+                    res.status(200).json({
+                        timestamp: Date.now(),
+                        msg: 'Successfully registered',
+                        record,
+                        code: 200
+                    });
+                } else {
+                    res.status(211).json({
+                        error: 'User alread exists',
+                        msg: 'Benutzer ist bereits vorhanden',
+                        code: 211
+                    });
+                }
             }
-            
         } else {
 
             return res.status(400).send({errors: result.array()});

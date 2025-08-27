@@ -47,6 +47,11 @@ regformdiv.addEventListener('submit', async(event) => {
 
         if (response.ok) {
 
+            if (response.status == 211) {
+                errMsgDiv.innerHTML = 'Benutzer bereits vorhanden';
+                return    
+            }
+            
             const { record } = await response.json();
             
             document.querySelector('.bbs-form h2').style.display = 'none';
@@ -66,10 +71,8 @@ regformdiv.addEventListener('submit', async(event) => {
             },5000);
 
         } else {
-            const { errors } = await response.json();
-            let testerr=errors[0].msg;
-            
-            throw new Error(testerr);
+                        
+            throw new Error(response.statusText);
         }
     } catch (err) {
         console.log('error: ', err);

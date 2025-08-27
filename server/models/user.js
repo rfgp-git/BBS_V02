@@ -19,9 +19,10 @@ let _ = class User {
     }
 
     // save user to the database
-    save() {
+    async save() {
         //console.log('Successfully saved user to the database:', this.id);
-        DB.write(this);
+        const result = await DB.write(this);
+        return result;
        
     }
 

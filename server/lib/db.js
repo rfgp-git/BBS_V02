@@ -132,15 +132,19 @@ let _ = class DB {
 
 
     // handling of users
-    static write(data) {
+    static async write(data) {
         
         if (data) {
             //this.localStorage.push(data);
             //console.log('database local storage:', this.localStorage);
             const usercontroller = new DBUserController();
             // create User in DB 
-            usercontroller.dbcreateUser(data);
-            return data;
+            const result = await usercontroller.dbcreateUser(data);
+            if (!result) {
+                return false;
+            } else {
+                return data;
+            }
         }
         return false;
     };

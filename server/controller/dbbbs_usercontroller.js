@@ -53,12 +53,15 @@ let _ = class DBUserController {
 
             if (existingUser) {
                 console.log('User already exists:', existingUser);
+                return false;
             } else {
                 await user.save();
                 console.log('User saved', user);
+                return true;
             }
         } catch(e) {
             console.log(e.message);
+            return false;
         }
     }
 }
