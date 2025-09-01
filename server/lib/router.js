@@ -230,7 +230,8 @@ _.get('/user', reqireAuth ,async (req, res) => {
                 id: req.user.id,
                 contact: user.contact,
                 email: user.email,
-                name: user.username
+                name: user.username,
+                phone: user.phone
             }
         });
 
@@ -241,6 +242,37 @@ _.get('/user', reqireAuth ,async (req, res) => {
             msg: 'Failed to get user, internal server error',
             code: 500
         });
+    }
+});
+
+_.post('/updateUser',  async (req,res) => {
+    
+    try {
+        console.log("body: ", req.body);
+
+        let userID = req.body.UUser.ID;
+        let userName = req.body.UUser.name;
+
+        const result= await DB.updateUser(req.body.UUser.ID, req.body.UUser.name, req.body.UUser.contact, req.body.UUser.phone, req.body.UUser.email, req.body.UUser.passwd);
+        if (result) { 
+            res.status(200).json({
+            timestamp: Date.now(),
+            msg: 'User successfully updated',
+            userID,
+            code: 200
+            });
+        } else {
+            res.status(404).json({
+                timestamp: Date.now(),
+                msg: 'User not updated',
+                userID,
+                userName,
+                code: 404
+            });
+        }
+        
+    } catch(e) {
+        throw new Error(e);
     }
 });
 

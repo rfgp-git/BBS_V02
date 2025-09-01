@@ -20,20 +20,14 @@ let _ = class DBUserController {
     }
 
     async dbfinduserbyID(id) {
-        let foundid = false;
+        let founduser = null;
         try {
-            foundid = await dbbbsuser.findById(id);
-            if (foundid) {
-                console.log('DBUserController.dbfinduserbyID:', foundid);
-                return foundid;
-            } else {
-                return false;
-            }
-            
+            founduser = await dbbbsuser.findById(id);
+            console.log('DBUserController.dbfinduserbyID:', founduser);
+            return founduser;
         } catch (e) {
             console.log(e.message);  
         }
-        
     }
     
     async dbcreateUser(data) {
@@ -62,6 +56,25 @@ let _ = class DBUserController {
         } catch(e) {
             console.log(e.message);
             return false;
+        }
+    }
+
+    async dbupdateUser(usr_ID, usr_name, usr_contact, usr_phone, usr_email, usr_passwd ) {
+        try {
+            const dbuser = await dbbbsuser.findOne({_id: usr_ID} );
+            
+            if (usr_name)      { dbuser.username   = usr_name;     }
+            if (usr_contact)   { dbuser.contact    = usr_contact;  }
+            if (usr_phone)     { dbuser.phone      = usr_phone;    }
+            if (usr_email)     { dbuser.email      = usr_email;    }
+            if (usr_passwd)    { dbuser.password   = usr_passwd;   }
+
+            dbuser.save();
+
+            console.log('User updated', usr_ID);
+            return usr_ID;
+        } catch(e) {
+            console.log(e.message);
         }
     }
 }

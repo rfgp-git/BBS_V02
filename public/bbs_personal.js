@@ -5,7 +5,10 @@ let personal_bills = [];
 document.getElementById('payin_cash').onclick = btn_cash_clicked;
 document.getElementById('transfer_Bill').onclick = btn_transfer_clicked;
 document.getElementById('paypal_Bill').onclick = btn_paypal_clicked;
-document.getElementById('close_Bill').onclick = btn_close_clicked;
+document.getElementById('close_Bill').onclick = btn_close_clicked; // for Admin
+
+document.getElementById('update_personal_data').onclick = btn_updatepsd_clicked;
+
 
 function init() {
 
@@ -45,6 +48,12 @@ function setUser() {
         menuItem1.textContent = 'Error';
         menuItem2.textContent = 'Error';
     }
+
+    document.getElementById("username").value = User.user.name;
+    document.getElementById("contactperson").value = User.user.contact;
+    document.getElementById("phone").value = User.user.phone;
+    document.getElementById("email").value = User.user.email;
+
 }
 
 async function create_invoice_table_data() {
@@ -169,30 +178,24 @@ async function getallInvoices() {
 }
 
 async function btn_cash_clicked() {
-
     triggerInvoice('cash');
-    
 }
 
 async function btn_transfer_clicked() {
-
     triggerInvoice('transfer');
-    
 }
 
 async function btn_paypal_clicked() {
-
     triggerInvoice('paypal');
-    
 }
 
 async function btn_close_clicked() {
-
     closeInvoice();
-    
 }
 
-
+async function btn_updatepsd_clicked() {
+    updatePersonalData();
+}
 
 async function triggerInvoice(payment) {
 
@@ -351,6 +354,47 @@ async function updateInvoice(inv_no, inv_payment, inv_status) {
     }
 }
 
+
+async function updatePersonalData() {
+    
+    let UUser = {};
+    
+    UUser= {
+                    "ID":       User.user.id,
+                    "name":     document.getElementById("username").value,
+                    "contact":  document.getElementById("contactperson").value,
+                    "phone":    document.getElementById("phone").value,
+                    "email":    document.getElementById("email").value,
+                    "passwd":   document.getElementById("password").value,
+            }
+
+    
+    try {
+        const response = await fetch('api/updateUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                UUser
+            })
+        });
+
+        if (!response.ok) {
+            const { errors } = await response.json();
+            let testerr=errors[0].msg;
+            throw new Error(testerr);
+        } else {
+            const invoice= await response.json();
+            console.log("reponse: ", UUser.ID);
+            return UUser.ID;
+        }
+    } catch (err) {
+        console.log('error: ', err);
+        alert ('Fehler beim Update der Benutzerdaten ' + err.message ? err.message: 'Unbekannter Fehler');
+    }
+}
+
 function disableButtons(flag) {
 
     let button1 = document.getElementById("payin_cash");
@@ -358,10 +402,16 @@ function disableButtons(flag) {
     let button3 = document.getElementById("paypal_Bill");
     let button4 = document.getElementById("close_Bill");
 
+    let input1 = document.getElementById("username");
+    let input2 = document.getElementById("contactperson");
+
     button1.disabled = flag;
     button2.disabled = flag;
     button3.disabled = flag;
     button4.disabled = flag;
+
+    input1.disabled = flag;
+    input2.disabled = flag;
 
 }
 

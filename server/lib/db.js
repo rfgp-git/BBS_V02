@@ -197,6 +197,22 @@ let _ = class DB {
 
     };
 
+    // update user properties
+    static async updateUser(usr_ID, usr_name, usr_contact, usr_phone, usr_email, usr_passwd) {
+        
+        if (usr_ID) {
+            const usercontroller = new DBUserController();
+            // update Event in DB 
+            const result = await usercontroller.dbupdateUser(usr_ID, usr_name, usr_contact, usr_phone, usr_email, usr_passwd);
+            if (result == 0) {
+                return false;
+            } else {
+                return usr_ID;
+            }
+        }
+        return false;
+    };
+
 }
 
 export default _;

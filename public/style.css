@@ -70,6 +70,22 @@ h2 {
     font-size: 14px;
 }
 
+.bbs-personal_data {
+    display:grid;
+    
+    width: 400px;
+}
+
+.bbs-personal_input {
+    height: 20px;
+    
+}
+
+.bbs-personal_label {
+    padding-top: 10px;
+    
+}
+
 .booking-button {
     background-color: rgb(84, 146, 222);
     color: white;

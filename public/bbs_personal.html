@@ -21,7 +21,7 @@
         <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
             <!-- Title -->
-            <span class="mdl-layout-title">BBS Profil</span>
+            <span class="mdl-layout-title">BBS Mein Konto</span>
             <!-- Add spacer, to align navigation to the right -->
             <div class="mdl-layout-spacer"></div>
             <!-- Navigation. We hide it in small screens. -->
@@ -38,7 +38,7 @@
         </div>
         </header>
         <div class="mdl-layout__drawer">
-        <span class="mdl-layout-title">BBS Profil</span>
+        <span class="mdl-layout-title">BBS Mein Konto</span>
         <nav class="mdl-navigation">
             <nav class="mdl-navigation mdl-layout--large-screen-only">
                 <a class="mdl-navigation__link" href="bbs_latest.html">Aktuelles</a>
@@ -52,7 +52,6 @@
             </nav>
         </div>
         <main class="mdl-layout__content">
-            <form id = "BBS_Bill_Form">
             <div class="page-content" id="bbs_bill"><!-- Your content goes here -->
                 <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" id = "invoice_table" style="table-layout: auto">
                     <h4>Rechnungen</h4>
@@ -79,7 +78,28 @@
                 <div class="bill_buttonbar" id="bill_buttonbar_Admin">
                     <button type = "button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"  id="close_Bill">Schliessen</button>
                 </div>
-                
+
+                <h4>Persönliche Daten</h4>
+
+                <form class="bbs-personal_data">
+                    <label for="username" class="bbs-personal_label">Benutzername</label>
+                    <input type="username" class="bbs-personal_input" id="username">
+
+                    <label for="contact" class="bbs-personal_label">Kontakt-Person</label>
+                    <input type="text" class="bbs-personal_input" id="contactperson">
+
+                    <label for="phone" class="bbs-personal_label">Telefon-Nr</label>
+                    <input type="tel" class="bbs-personal_input" id="phone">
+
+                    <label for="email" class="bbs-personal_label">E-Mail</label>
+                    <input type="email" class="bbs-personal_input" id="email">
+
+                    <label for="password" class="bbs-personal_label">Neues Passwort</label>
+                    <input type="password" class="bbs-personal_input" id="password">
+
+                    <button type = "button" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"  id="update_personal_data" style="width:200px;">Aktualisieren</button>
+
+                </form>
             </div>
         </main>
     </div>
