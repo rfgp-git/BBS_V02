@@ -163,6 +163,12 @@ h2 {
     width: 120px;
 }
 
+#page_help {
+    padding: 10px;
+    overflow: scroll; 
+    overflow: auto;
+}
+
 
 #error-message {
     color: rgb(229,99,99);
