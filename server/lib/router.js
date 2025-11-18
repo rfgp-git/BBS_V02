@@ -19,8 +19,6 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import nodemailer from 'nodemailer';
 import 'dotenv/config';
-import  paypal from '../services/paypal.js';
-
 
 
 let _ = express.Router();
@@ -640,18 +638,6 @@ _.post('/updateInvoice',  async (req,res) => {
         }
 });
 
-_.post('/paypal', async (req,res) => {
-    
-    const invoiceparam = req.body;
-
-    try {
-        const url = paypal.createOrder(invoiceparam.Bill_No, invoiceparam.Bill_SumTotal);
-        res.redirect(url);
-
-    } catch (error) {
-        res.send('Error: ' + error);
-    }
-});
 
 _.post('/getHolidays' ,async (req, res) => {
 

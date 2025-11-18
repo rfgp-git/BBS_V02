@@ -4,7 +4,6 @@ let personal_bills = [];
 
 document.getElementById('payin_cash').onclick = btn_cash_clicked;
 document.getElementById('transfer_Bill').onclick = btn_transfer_clicked;
-document.getElementById('paypal_Bill').onclick = btn_paypal_clicked;
 document.getElementById('close_Bill').onclick = btn_close_clicked; // for Admin
 
 document.getElementById('update_personal_data').onclick = btn_updatepsd_clicked;
@@ -185,9 +184,6 @@ async function btn_transfer_clicked() {
     triggerInvoice('transfer');
 }
 
-async function btn_paypal_clicked() {
-    triggerInvoice('paypal');
-}
 
 async function btn_close_clicked() {
     closeInvoice();
@@ -220,11 +216,9 @@ async function triggerInvoice(payment) {
                     "Bill_Recipient":   User.user.name,
                     "Bill_Status":      'in progress',
             }
-            if (payment == 'paypal') {
-                result = await generateInvoicePayPal(objinvoice);
-            } else {
-                result = await generateInvoice(objinvoice);                
-            }
+            
+            result = await generateInvoice(objinvoice);
+            
             // change the payment and the status
             if (result == true) {
                 await updateInvoice(objinvoice.Bill_No, objinvoice.Bill_Payment, objinvoice.Bill_Status );
@@ -295,34 +289,6 @@ async function generateInvoice(invoicedata) {
     }
 }
 
-async function generateInvoicePayPal(invoicedata) {
-        console.log('invoice: ', invoicedata); 
-     
-        try {
-        
-        const response = await fetch('api/paypal', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(invoicedata)
-        });
-
-        if (!response.ok) {
-            const { errors } = await response.json();
-            let testerr=errors[0].msg;
-            throw new Error(testerr);
-            return false;
-        } else {
-            alert("Bezahlung erfolgt über PayPal !");
-            return true;
-        }
-
-    } catch (err) {
-        console.log('error: ', err);
-        alert ('Fehler bei der Nutzung der PayPal API ' + err.message ? err.message: 'Unbekannter Fehler');
-    }
-}
 
 async function updateInvoice(inv_no, inv_payment, inv_status) {
 
@@ -399,8 +365,7 @@ function disableButtons(flag) {
 
     let button1 = document.getElementById("payin_cash");
     let button2 = document.getElementById("transfer_Bill");
-    let button3 = document.getElementById("paypal_Bill");
-    let button4 = document.getElementById("close_Bill");
+    let button3 = document.getElementById("close_Bill");
 
     let input1 = document.getElementById("username");
     let input2 = document.getElementById("contactperson");
@@ -408,7 +373,6 @@ function disableButtons(flag) {
     button1.disabled = flag;
     button2.disabled = flag;
     button3.disabled = flag;
-    button4.disabled = flag;
 
     input1.disabled = flag;
     input2.disabled = flag;
@@ -420,8 +384,7 @@ function ondisableButtons() {
     let buttonbardisabled = true;
     let button1 = document.getElementById("payin_cash");
     let button2 = document.getElementById("transfer_Bill");
-    let button3 = document.getElementById("paypal_Bill");
-    let button4 = document.getElementById("close_Bill");
+    let button3 = document.getElementById("close_Bill");
 
     const table = document.getElementById("invoice_table");
 
@@ -445,7 +408,6 @@ function ondisableButtons() {
     button1.disabled = buttonbardisabled;
     button2.disabled = buttonbardisabled;
     button3.disabled = buttonbardisabled;
-    button4.disabled = buttonbardisabled;
-
+    
 }
 
