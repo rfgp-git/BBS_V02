@@ -123,7 +123,8 @@ window.onload = async () => {
 
     const submit_btn = document.getElementById("submitButton");
     submit_btn.addEventListener("click", event => {
-        submitEvent(event);     
+        submitEvent(event); 
+        closeModalDialog();    
     });
 
     const delete_btn = document.getElementById("deleteButton");
