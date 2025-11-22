@@ -130,7 +130,7 @@ h2 {
     display: flex;
     justify-content: center; /* Horizontal centering */
     align-items: center;    /* Vertical centering */
-    margin-top: 450px;
+    margin-top: 400px;
     text-align:left;
     font-size: 16px;
     font-weight: bold;
@@ -146,7 +146,7 @@ h2 {
 
 .mdl-data-table {
     margin: 10px;
-    table-layout: fixed;
+    
     width: 70%;
 }
 

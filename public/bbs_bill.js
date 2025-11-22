@@ -5,7 +5,9 @@
     let drinksum = 0; // memorize subtotal
     
     document.getElementById('save_Bill').onclick = btn_save_clicked;
+    document.getElementById('save_Bill').ontouchstart = btn_save_clicked;
     document.getElementById('new_Bill').onclick = btn_new_clicked;
+    document.getElementById('new_Bill').ontouchstart = btn_new_clicked;
 
     // invoice total data
     let objinvoice   = {};

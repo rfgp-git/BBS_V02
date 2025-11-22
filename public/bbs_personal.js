@@ -3,10 +3,14 @@ let User={};
 let personal_bills = [];
 
 document.getElementById('payin_cash').onclick = btn_cash_clicked;
+document.getElementById('payin_cash').ontouchstart = btn_cash_clicked;
 document.getElementById('transfer_Bill').onclick = btn_transfer_clicked;
+document.getElementById('transfer_Bill').ontouchstart = btn_transfer_clicked;
 document.getElementById('close_Bill').onclick = btn_close_clicked; // for Admin
+document.getElementById('close_Bill').ontouchstart = btn_close_clicked; // for Admin
 
 document.getElementById('update_personal_data').onclick = btn_updatepsd_clicked;
+document.getElementById('update_personal_data').ontouchstart = btn_updatepsd_clicked;
 
 
 function init() {
