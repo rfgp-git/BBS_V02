@@ -8,6 +8,8 @@ let processingMode;
 let existingEvent = {};
 let exEventIndex = -1;
 let dbevents = [];
+let groupId = null;
+let groupNo = null;
 
 const MODE = {
     VIEW: 1,
@@ -19,6 +21,7 @@ const wdays = ['So', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 let seriesmap = new Map();
 
 window.onload = async () => {
+    let groupIdParts = null;
     
     seriesmap.set('once',0);
     seriesmap.set('weekly_1',1);
@@ -77,6 +80,10 @@ window.onload = async () => {
             dbevents.events[i].eventTextColor = '#000000';
             dbevents.events[i].color='#4CAF50'; // green
             if (dbevents.events[i].groupId != null) {
+                groupIdParts = dbevents.events[i].groupId.split("_");
+                if (groupIdParts[1] > groupNo) {
+                    groupNo = groupIdParts[1]; 
+                }
                 calendar.addEvent(dbevents.events[i]);
             } else {
                 calendar.addEvent({
@@ -114,6 +121,21 @@ window.onload = async () => {
         }
     }
 
+    const eventForm = document.getElementById('eventModal');
+
+    // Add a listener to the submit event
+    eventForm.addEventListener('submit', function (e) {
+        const errors = [];
+
+        //e.preventDefault();
+        
+        // Check inputs...
+
+        if(errors.length) {
+            e.preventDefault(); // The browser will not make the HTTP POST request
+            return;
+        }
+    });
 
     // buttons of modal dialog
     const cancel_btn = document.getElementById("cancelButton");
@@ -124,14 +146,17 @@ window.onload = async () => {
     const submit_btn = document.getElementById("submitButton");
     submit_btn.addEventListener("click", event => {
         submitEvent(event); 
-        closeModalDialog();    
+        closeModalDialog();
+        window.location.reload(); 
     });
 
     const delete_btn = document.getElementById("deleteButton");
     delete_btn.addEventListener("click", event => {
         deleteEvent(event);     
     });
-    
+
+    // get group ID for event series
+    //groupId = await getGroupID(User.user.name);
 
 }
 
@@ -404,11 +429,10 @@ async function submitEvent(event) {
     let duration    = null;
     let exdate      = [];
     let dbeventid   = null;
-    let groupId     = null;
     let wday        = null;
     let dtstart     = null;
 
-    event.preventDefault();
+    
     
     const form=document.getElementById("eventModal");
     
@@ -418,6 +442,8 @@ async function submitEvent(event) {
         alert("Bitte eine Reservierungs-Bezeichnug eingeben");
         return;
     }
+    
+    
 
     console.log("Bezeichnung: ", document.getElementById("eventTitle").value);
 
@@ -450,10 +476,13 @@ async function submitEvent(event) {
             switch (series_freq) {
                 case "once":
                     console.log("Serie: " + series + " " + wdays[day]);
-                    dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, groupId, freq, interval, wday, until, dtstart, duration, exdate);
+                    dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, null, freq, interval, wday, until, dtstart, duration, exdate);
                 break;
                 case "weekly":
                     console.log("Serie: " + series + " " + wdays[day]);
+                    
+                    //event.preventDefault();
+                    
                     interval = series_interval;
                     until = untilday[0];    //'2025-12-31';
                     freq = 'weekly';
@@ -464,11 +493,22 @@ async function submitEvent(event) {
                         exdate [i] = aholidays[i] + "T" + daytime[1];
                     }
                     
-                    groupId = await getGroupID(User.user.name);
-                    //let groupID = "test_1";
-                    console.log("GROUPID: ", groupId);
+                    
                     wday    = wdays[day];
                     dtstart = eventstart;
+
+                    //let groupID = "test_1";
+                    // create groupId
+                    if (groupNo === null) {
+                        groupId = User.user.name +"_" + 1;
+                    }
+                    else {
+                        // increment groupNo
+                        groupNo++;
+                        groupId = User.user.name + "_" + groupNo;
+
+                    }
+                    console.log("GROUPID: ", groupId);
                     
                     dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, groupId, freq, interval, wdays[day], dtstart, until, duration, exdate);
                     
