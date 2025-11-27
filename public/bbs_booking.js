@@ -144,8 +144,9 @@ window.onload = async () => {
     });
 
     const submit_btn = document.getElementById("submitButton");
-    submit_btn.addEventListener("click", event => {
-        submitEvent(event); 
+    submit_btn.addEventListener("click", async event => {
+        let result = await submitEvent(event); 
+        console.log("Submit:", result);
         closeModalDialog();
         window.location.reload(); 
     });
@@ -432,19 +433,12 @@ async function submitEvent(event) {
     let wday        = null;
     let dtstart     = null;
 
-    
-    
     const form=document.getElementById("eventModal");
-    
-    if (form.checkValidity()) {
-        form.submit();
-    } else {
+    if (!form.checkValidity()) {
         alert("Bitte eine Reservierungs-Bezeichnug eingeben");
-        return;
+        return false;
     }
-    
-    
-
+        
     console.log("Bezeichnung: ", document.getElementById("eventTitle").value);
 
     const title = User.user.name + ": " + document.getElementById("eventTitle").value;
@@ -475,8 +469,10 @@ async function submitEvent(event) {
 
             switch (series_freq) {
                 case "once":
+                    event.preventDefault();
                     console.log("Serie: " + series + " " + wdays[day]);
                     dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, null, freq, interval, wday, until, dtstart, duration, exdate);
+                    return dbeventid;
                 break;
                 case "weekly":
                     console.log("Serie: " + series + " " + wdays[day]);
@@ -511,6 +507,7 @@ async function submitEvent(event) {
                     console.log("GROUPID: ", groupId);
                     
                     dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, groupId, freq, interval, wdays[day], dtstart, until, duration, exdate);
+                    return dbeventid;
                     
                 break;
 
@@ -541,6 +538,7 @@ async function submitEvent(event) {
 
     } catch (err) {
         alert('Fehler beim Anlegen oder beim Aktualisieren der Reservierung' + err?.message || 'Unbekannter Fehler');
+        return false;
     } 
 }
 
@@ -582,6 +580,7 @@ async function saveEventtoDB(userid, title, start, end, groupId, freq, interval,
     } catch (err) {
         console.log('error: ', err);
         alert ('Fehler beim Speichern des Events ' + err.message ? err.message: 'Unbekannter Fehler');
+        return 0;
     }
 }
 
