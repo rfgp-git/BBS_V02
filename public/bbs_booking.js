@@ -121,22 +121,7 @@ window.onload = async () => {
         }
     }
 
-    const eventForm = document.getElementById('eventModal');
-
-    // Add a listener to the submit event
-    eventForm.addEventListener('submit', function (e) {
-        const errors = [];
-
-        //e.preventDefault();
-        
-        // Check inputs...
-
-        if(errors.length) {
-            e.preventDefault(); // The browser will not make the HTTP POST request
-            return;
-        }
-    });
-
+    
     // buttons of modal dialog
     const cancel_btn = document.getElementById("cancelButton");
     cancel_btn.addEventListener("click", event => {
@@ -155,9 +140,6 @@ window.onload = async () => {
     delete_btn.addEventListener("click", event => {
         deleteEvent(event);     
     });
-
-    // get group ID for event series
-    //groupId = await getGroupID(User.user.name);
 
 }
 
@@ -448,7 +430,6 @@ async function submitEvent(event) {
     const endTime = new Date(eventend);
 
     if (endTime <= startTime) {
-        event.preventDefault(); // Prevent form submission
         alert("Die Ende-Zeit muss größer als die Start-Zeit sein!");
         return;
     }
@@ -469,15 +450,12 @@ async function submitEvent(event) {
 
             switch (series_freq) {
                 case "once":
-                    event.preventDefault();
                     console.log("Serie: " + series + " " + wdays[day]);
                     dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, null, freq, interval, wday, until, dtstart, duration, exdate);
                     return dbeventid;
                 break;
                 case "weekly":
                     console.log("Serie: " + series + " " + wdays[day]);
-                    
-                    //event.preventDefault();
                     
                     interval = series_interval;
                     until = untilday[0];    //'2025-12-31';
