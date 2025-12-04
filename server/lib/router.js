@@ -44,16 +44,21 @@ const __dirname = dirname(__filename);
 // PDF replacer
 const { PDFNet } = pdfpckg;
 
+const mailprovider = process.env.APP_MAIL_PROVIDER;
+
 // e-mail settings
 
 // Create a test account or replace with real credentials.
 const transporter = nodemailer.createTransport({
-  service: "gmail",
-  host: "smtp.gmail.com",
+  //service: "gmail",
+  //host: "smtp.gmail.com",
+  //service: "gmail",
+  //host: 'smtp.hosteurope.de',
+  host: mailprovider,
   port: 587,
   secure: false, // true for 465, false for other ports
   auth: {
-    user: process.env.USER,
+    user: process.env.APP_USER,
     pass: process.env.APP_PASSWORD
   },
   //debug: true, // Enable debug output
@@ -72,6 +77,8 @@ const sendMail = async (transporter, mailOptions) => {
         console.log('with attachment', mailOptions.attachments);
 
     } catch(error) {
+        console.log('E-Mail sent not from ', mailOptions.from);
+        console.log('E-Mail sent not to ', mailOptions.to);
         console.error(error);
     }
 } 
@@ -572,9 +579,10 @@ _.post('/generateInvoice' ,async (req, res) => {
         const mailOptions = {
             from: {
                 name: 'KV-Sankt-Kunigund',
-                address: process.env.USER
+                address: process.env.APP_USER
             },
-            to: 'peter.tyrach@googlemail.com',
+            //to: 'peter.tyrach@googlemail.com',
+            to: invoiceparam.Bill_Mail,
             subject: 'BBS Rechnung',
             text: 'Kegelbahn Schnaittach',
             html: "Rechnung für die Kegelbahn in Schnaittach",

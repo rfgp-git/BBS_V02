@@ -219,6 +219,7 @@ async function triggerInvoice(payment) {
                     "Bill_SumTotal":    row.cells[8].textContent,
                     "Bill_Recipient":   User.user.name,
                     "Bill_Status":      'in progress',
+                    "Bill_Mail":        User.user.email
             }
             
             result = await generateInvoice(objinvoice);
