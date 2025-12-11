@@ -50,10 +50,6 @@ const mailprovider = process.env.APP_MAIL_PROVIDER;
 
 // Create a test account or replace with real credentials.
 const transporter = nodemailer.createTransport({
-  //service: "gmail",
-  //host: "smtp.gmail.com",
-  //service: "gmail",
-  //host: 'smtp.hosteurope.de',
   host: mailprovider,
   port: 587,
   secure: false, // true for 465, false for other ports

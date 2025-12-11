@@ -27,6 +27,7 @@ window.onload = async () => {
     seriesmap.set('weekly_1',1);
     seriesmap.set('weekly_2',2);
     seriesmap.set('weekly_3',3);
+    seriesmap.set('weekly_4',4);
 
     let menuItem1 = document.getElementById("Menu_Profile1");
     let menuItem2 = document.getElementById("Menu_Profile2");
@@ -121,7 +122,8 @@ window.onload = async () => {
         }
     }
 
-    
+    let bbsevents = calendar.getEvents();
+
     // buttons of modal dialog
     const cancel_btn = document.getElementById("cancelButton");
     cancel_btn.addEventListener("click", event => {
@@ -182,6 +184,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         initialDate: new Date(),
         navLinks: true, // can click day/week names to navigate views
         selectable: true,
+        
         //droppable: true,
         //selectMirror: true,
         select: async function(arg) {
@@ -210,6 +213,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                 return false; 
             }
 
+            if (arg.allDay) {
+                calendar.unselect();
+                arg.jsEvent.stopPropagation();
+                return false; 
+            }
+        
             // open modal dialog
             processingMode = MODE.CREATE;
             openModalDialog(arg);
@@ -433,6 +442,14 @@ async function submitEvent(event) {
         alert("Die Ende-Zeit muss größer als die Start-Zeit sein!");
         return;
     }
+
+    
+    /*
+    if (isOverlapping(eventstart, eventend, calendar.getEvents())) {
+        alert('❌ This time overlaps with an existing event.');
+    }
+    */
+    
 
     const series = document.getElementById("seriesSelect").value.split('_');
 
@@ -782,3 +799,23 @@ function getEvIndex(evgroupid) {
     }
     return result;
 }
+
+/**
+   * Check if a new event overlaps with existing events
+   * @param {Date} start - Start date/time of new event
+   * @param {Date} end - End date/time of new event
+   * @param {Array} events - Existing FullCalendar events
+   * @returns {boolean} - True if overlap exists
+   */
+  function isOverlapping(start, end, events) {
+    var newStart = moment(start);
+    var newEnd = moment(end);
+
+    return events.some(function(event) {
+      var eventStart = moment(event.start);
+      var eventEnd = event.end ? moment(event.end) : eventStart;
+
+      // Overlap condition: start < existing end && end > existing start
+      return newStart.isBefore(eventEnd) && newEnd.isAfter(eventStart);
+    });
+  }
