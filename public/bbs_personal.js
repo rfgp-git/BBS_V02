@@ -1,6 +1,7 @@
 // global
 let User={};
-let personal_bills = [];
+let personal_bills   = [];
+let usercontact_data = [];
 
 document.getElementById('payin_cash').onclick = btn_cash_clicked;
 document.getElementById('payin_cash').ontouchstart = btn_cash_clicked;
@@ -19,6 +20,8 @@ function init() {
 
     const bar1 = document.getElementById('bill_buttonbar_Bowler');
     const bar2 = document.getElementById('bill_buttonbar_Admin');
+    const usercontact_header = document.getElementById('usercontact_header');
+    const usercontact_table = document.getElementById('usercontact_table');
 
     if (User.user.name === 'Administrator') {
         bar1.style.display = "none";
@@ -26,9 +29,15 @@ function init() {
     } else {
         bar1.style.display = "initial";
         bar2.style.display = "none";
+        usercontact_header.style.display = "none";
+        usercontact_table.style.display = "none";
     }
     
     create_invoice_table_data();
+    
+    if (User.user.name === 'Administrator') {
+        create_usercontact_table_data();
+    }
 
 }
 
@@ -118,6 +127,33 @@ async function create_invoice_table_data() {
 
 }
 
+async function create_usercontact_table_data() {
+
+    let total_sum = 0;
+
+    const tbl_usercontact = document.getElementById('usercontact_table');
+    // empty table
+    for(let i = 1; i < tbl_usercontact.rows.length;){
+        tbl_usercontact.deleteRow(i);
+    }
+
+    let tbl_body = document.getElementById('usercontact_table_body');
+
+    usercontact_data= await getallUsers();
+    
+    for (let i=0; i < usercontact_data.length; i++)
+    {
+        let row = "<tr>" +
+                            "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + usercontact_data[i].username + "</td>" +
+                            "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + usercontact_data[i].contact + "</td>" +
+                            "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + usercontact_data[i].phone + "</td>" +
+                            "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + usercontact_data[i].email + "</td>" +
+                    "</tr>";
+    
+        tbl_body.innerHTML += row;
+    }
+}
+
 async function getmyInvoices(userid) {
     let result = [];
     try {
@@ -177,6 +213,36 @@ async function getallInvoices() {
     } catch (err) {
         console.log('error: ', err);
         alert ('Fehler beim Einlesen aller Rechnungen ' + err.message ? err.message: 'Unbekannter Fehler');
+    }
+}
+
+async function getallUsers() {
+    let result = [];
+    try {
+        const response = await fetch('api/getallUsers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            
+        });
+
+        if (response.ok) {
+            
+        result = await response.json();
+        return result.users;
+
+        } else {
+            if (!response.ok) {
+                const { errors } = await response.json();
+                let testerr=errors[0].msg;
+                throw new Error(testerr);
+            }
+        }
+    } catch (err) {
+        console.log('error: ', err);
+        alert ('Fehler beim Einlesen aller Benutzer ' + err.message ? err.message: 'Unbekannter Fehler');
     }
 }
 

@@ -277,6 +277,26 @@ _.post('/updateUser',  async (req,res) => {
     }
 });
 
+_.post('/getallUsers' ,async (req, res) => {
+
+    try {
+        let dbinterface = new DB();
+        const users = await dbinterface.getallUsers();
+
+        console.log("getallUsers total :", users.length);
+
+        res.status(200).json({users});
+
+    } catch (err) {
+        console.error(new Error(err.message));
+        res.status(500).json({
+            timestamp: Date.now(),
+            msg: 'Failed to get all users, internal server error',
+            code: 500
+        });
+    }
+});
+
 // POST /saveEvent
 
 _.post('/saveEvent',  async (req,res) => {

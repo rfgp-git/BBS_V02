@@ -31,7 +31,7 @@ let _ = class DB {
         
     };
 
-    // get my invoices
+    // get all invoices
     async getallInvoices() {
         let invoices = [];
                 
@@ -211,6 +211,18 @@ let _ = class DB {
             }
         }
         return false;
+    };
+
+    // get all users
+    async getallUsers() {
+        let users = [];
+                
+        const usercontroller = new DBUserController();
+        
+        users = await usercontroller.dbgetallUsers();
+        
+        return users;
+        
     };
 
 }

@@ -77,27 +77,26 @@ let _ = class DBUserController {
             console.log(e.message);
         }
     }
+    async dbgetallUsers() {
+        let foundusers = [];
+        try {
+            // get all users
+                foundusers = await dbbbsuser.find();
+                if (foundusers.length != 0) {
+                    console.log('DBEUserController.dbfindallUsers total :', foundusers.length);
+                    return foundusers;
+                } else {
+                    return false;
+                }
+
+        } catch (e) {
+            console.log(e.message);  
+        }
+        
+    }
 }
 
 export default _;
-
-/*
-const index = dbbbsuser.find({}, (err, users) => {
-
-    if (err) {
-        console.error(err);
-        return
-    } 
-
-    if (users.length == 0) {
-        console.log('No record found');
-        return
-    }
-
-    console.log(users);
-
-});
-*/
 
 
 
