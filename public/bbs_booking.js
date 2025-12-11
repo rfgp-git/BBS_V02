@@ -77,7 +77,7 @@ window.onload = async () => {
     dbevents = await getEventsfromDB();
 
     for (let i = 0; i < dbevents.events.length; i++) {
-        if (User.user.id === dbevents.events[i].userid ) {
+        if (User.user.id === dbevents.events[i].userid || User.user.name === 'Administrator' ) {
             dbevents.events[i].eventTextColor = '#000000';
             dbevents.events[i].color='#4CAF50'; // green
             if (dbevents.events[i].groupId != null) {
@@ -184,6 +184,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         initialDate: new Date(),
         navLinks: true, // can click day/week names to navigate views
         selectable: true,
+        eventDurationEditable: false,
         
         //droppable: true,
         //selectMirror: true,
@@ -227,7 +228,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         eventClick: async function(arg) {
             exEventIndex = -1;
-            if (User.user.id === arg.event._def.extendedProps.userid) {
+            if (User.user.id === arg.event._def.extendedProps.userid || User.user.name === 'Administrator') {
                 // update existing event
                 existingEvent = arg;
                 if (existingEvent.event._def.groupId != "") {
