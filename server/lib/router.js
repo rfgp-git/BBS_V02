@@ -54,8 +54,8 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false, // true for 465, false for other ports
   auth: {
-    user: process.env.APP_USER,
-    pass: process.env.APP_PASSWORD
+    user: process.env.APP_MAIL_USER,
+    pass: process.env.APP_MAIL_PASSWORD
   },
   //debug: true, // Enable debug output
   //logger: true, // Log information
@@ -70,7 +70,9 @@ const sendMail = async (transporter, mailOptions) => {
 
         await transporter.sendMail(mailOptions);
         console.log('E-Mail sent successfully to ', mailOptions.to);
-        console.log('with attachment', mailOptions.attachments);
+        if (mailOptions.attachments != null) {
+            console.log('with attachment', mailOptions.attachments);
+        }
 
     } catch(error) {
         console.log('E-Mail sent not from ', mailOptions.from);
@@ -329,7 +331,16 @@ _.post('/saveEvent',  async (req,res) => {
                 code: 200
             });
 
-        
+            let series ="";
+
+            if (req.body.freq == null) {
+                series = "einmalig";
+            } else {
+                series = "wöchentlich";
+            }
+
+            sendEMailtoAdmin("Neu", req.body.title, req.body.start, req.body.end, series, req.body.interval);
+
     } catch(e) {
         throw new Error(e);
     }    
@@ -595,7 +606,7 @@ _.post('/generateInvoice' ,async (req, res) => {
         const mailOptions = {
             from: {
                 name: 'KV-Sankt-Kunigund',
-                address: process.env.APP_USER
+                address: process.env.APP_MAIL_USER
             },
             //to: 'peter.tyrach@googlemail.com',
             to: invoiceparam.Bill_Mail,
@@ -730,3 +741,31 @@ _.all(/(.*)/, async(req,res) => {
 }); 
 
 export default _;
+
+function sendEMailtoAdmin(action, title, start, end, series, interval) {
+
+    const htmlText = "<p><b>Reservierung " + action + "</b><br>" + 
+                             "Titel: " + title + "<br>" +
+                             "Start: " + start + "<br>" +
+                             "Ende: " + end + "<br>" +
+                             "Serie: " + series + "(" + interval + ")" + "<br>" +
+                             "</p>";
+
+    const subject = "BBS Reservierung " + action;
+    
+    const mailOptions = {
+        from: {
+            name: 'KV-Sankt-Kunigund',
+            address: process.env.APP_MAIL_USER
+        },
+        //to: 'peter.tyrach@googlemail.com',
+        to: process.env.APP_MAIL_ADMIN,
+        subject: subject,
+        text: 'Kegelbahn Schnaittach',
+        html: htmlText
+    }
+    
+    sendMail(transporter, mailOptions);
+
+};
+
