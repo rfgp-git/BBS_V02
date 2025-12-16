@@ -339,7 +339,7 @@ _.post('/saveEvent',  async (req,res) => {
                 series = "wöchentlich";
             }
 
-            sendEMailtoAdmin("Neu", req.body.title, req.body.start, req.body.end, series, req.body.interval);
+            sendEMailtoAdmin("New", req.body.title, req.body.start, req.body.end, series, req.body.interval);
 
     } catch(e) {
         throw new Error(e);
@@ -347,7 +347,7 @@ _.post('/saveEvent',  async (req,res) => {
 });
 
 _.post('/updateEvent',  async (req,res) => {
-    
+    let series ="";
     try {
         console.log("body: ", req.body);
         
@@ -366,6 +366,21 @@ _.post('/updateEvent',  async (req,res) => {
                 eventid,
                 code: 200
                 });
+
+                if (req.body.freq == null) {
+                    series = "einmalig";
+                } else {
+                    series = "wöchentlich";
+                }
+
+                if (req.body.exdate.length === 0 ) {
+                    // normal Event
+                    sendEMailtoAdmin("Updated", eventtitle, eventstart, eventend, series, req.body.interval);
+                } else {
+                    // series
+                    sendEMailtoAdmin("Event removed from series", eventtitle, eventstart, req.body.exdate, series, req.body.interval);
+                }
+
             } else {
                 res.status(404).json({
                     timestamp: Date.now(),
@@ -388,7 +403,14 @@ _.post('/deleteEvent',  async (req,res) => {
         
 
             // save the event to the database
-            const eventid = req.body.eventid; 
+            const eventid = req.body.eventid;
+            const eventtitle = req.body.title;
+            const eventstart = req.body.start;
+            const eventend = req.body.end;
+            const eventfreq = req.body.freq;
+            const eventinterval = req.body.interval;
+
+
             const result= await DB.deleteEvent(eventid);
             if (result) { 
                 res.status(200).json({
@@ -397,6 +419,7 @@ _.post('/deleteEvent',  async (req,res) => {
                 eventid,
                 code: 200
                 });
+                sendEMailtoAdmin("Deleted", eventtitle, eventstart, eventend, eventfreq, eventinterval);
             } else {
                 res.status(404).json({
                     timestamp: Date.now(),
@@ -744,12 +767,22 @@ export default _;
 
 function sendEMailtoAdmin(action, title, start, end, series, interval) {
 
-    const htmlText = "<p><b>Reservierung " + action + "</b><br>" + 
-                             "Titel: " + title + "<br>" +
-                             "Start: " + start + "<br>" +
-                             "Ende: " + end + "<br>" +
-                             "Serie: " + series + "(" + interval + ")" + "<br>" +
-                             "</p>";
+    let htmlText = "";
+    if (action === "Event removed from series") {
+        htmlText = "<p><b>Reservierung " + action + "</b><br>" + 
+                            "Titel: " + title + "<br>" +
+                            "Start: " + start + "<br>" +
+                            "Event entfernt: " + end + "<br>" +
+                            "Serie: " + series + "(" + interval + ")" + "<br>" +
+                            "</p>";
+    } else {
+        htmlText = "<p><b>Reservierung " + action + "</b><br>" + 
+                            "Titel: " + title + "<br>" +
+                            "Start: " + start + "<br>" +
+                            "Ende: " + end + "<br>" +
+                            "Serie: " + series + "(" + interval + ")" + "<br>" +
+                            "</p>";
+    }
 
     const subject = "BBS Reservierung " + action;
     
@@ -765,7 +798,7 @@ function sendEMailtoAdmin(action, title, start, end, series, interval) {
         html: htmlText
     }
     
-    sendMail(transporter, mailOptions);
+    //sendMail(transporter, mailOptions);
 
 };
 

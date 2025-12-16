@@ -189,7 +189,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         //droppable: true,
         //selectMirror: true,
         select: async function(arg) {
-            
             // events can only be added in the weeks and day view
             if (arg.view.type == 'dayGridMonth') {
                 calendar.unselect();
@@ -239,41 +238,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 openModalDialog(arg);
             }
           },
-    editable: true,
-    dayMaxEvents: true, // allow "more" link when too many events
-    /*
-    events: 'bbs_closed_days.json',
-    eventDidMount: function(info) {
-        if (info.event.title == 'Kegelbahn geschlossen') {
-           if (!aclosed.includes(info.event.startStr)) {
-                    aclosed.push(info.event.startStr);
-            }
-        }
-    }
-*/
-    /*
-    events: [
-        // red areas where no events can be dropped
-        {
-            title: 'Recurring Event',
-            //start: '2025-06-17T10:00',
-            //end: '2025-06-17T12:00',
-            color: '#00ff00',
-            groupId: 'groupTest',
-            rrule: {
-                freq: 'weekly',
-                interval: 2,
-                byweekday: [ 'Tu'],
-                dtstart: '2025-06-17T10:00',
-
-                until: ['2025-12-31'],
-            },
-            duration: '2:00',
-            exdate: '2025-07-01T10:00'
-        },
-    ]
-    */
-    
+        editable: false,
+        dayMaxEvents: true, // allow "more" link when too many events
     });
 
     calendar.render();
@@ -402,12 +368,17 @@ async function deleteEvent(event) {
         }
         
         if (choice == 'S') {
-            await removeEventfromDB(existingEvent.event._def.extendedProps._id);
+            await removeEventfromDB(existingEvent.event._def.extendedProps._id, 
+                                    dbevents.events[exEventIndex].title, dbevents.events[exEventIndex].start,
+                                    dbevents.events[exEventIndex].end, dbevents.events[exEventIndex].rrule.freq,
+                                    dbevents.events[exEventIndex].rrule.interval);
             existingEvent.event.remove();    
         } 
         
     } else {
-        await removeEventfromDB(existingEvent.event._def.extendedProps._id);
+        await removeEventfromDB(existingEvent.event._def.extendedProps._id,
+                                existingEvent.event.title, existingEvent.event.start,
+                                existingEvent.event.end, "einmalig", "0");
         existingEvent.event.remove();
     }
         
@@ -434,6 +405,7 @@ async function submitEvent(event) {
     console.log("Bezeichnung: ", document.getElementById("eventTitle").value);
 
     const title = User.user.name + ": " + document.getElementById("eventTitle").value;
+    const eventday = document.getElementById("eventDate").value;
     const eventstart = document.getElementById("eventDate").value + "T" + document.getElementById("eventStart").value;
     const eventend = document.getElementById("eventDate").value + "T" + document.getElementById("eventEnd").value;
     const startTime = new Date(eventstart);
@@ -444,7 +416,10 @@ async function submitEvent(event) {
         return;
     }
 
-    
+    if (checkDayOverlapping(eventday, eventstart, eventend, calendar.getEvents())) {
+        alert('❌ Überschneidung mit vorhandener Reservierung');
+        return false;
+    }
     /*
     if (isOverlapping(eventstart, eventend, calendar.getEvents())) {
         alert('❌ This time overlaps with an existing event.');
@@ -619,7 +594,7 @@ async function updateEventinDB(eventid, title, start, end, freq, interval, weekd
 }
 
 
-async function removeEventfromDB(eventid) {
+async function removeEventfromDB(eventid, title, start, end, freq, interval) {
     console.log("removeEventfromDB: <" + eventid + ">");
 
     try {
@@ -630,7 +605,12 @@ async function removeEventfromDB(eventid) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                eventid
+                eventid,
+                title,
+                start,
+                end,
+                freq,
+                interval
             })
         });
 
@@ -801,22 +781,28 @@ function getEvIndex(evgroupid) {
     return result;
 }
 
-/**
-   * Check if a new event overlaps with existing events
-   * @param {Date} start - Start date/time of new event
-   * @param {Date} end - End date/time of new event
-   * @param {Array} events - Existing FullCalendar events
-   * @returns {boolean} - True if overlap exists
-   */
-  function isOverlapping(start, end, events) {
-    var newStart = moment(start);
-    var newEnd = moment(end);
+function checkDayOverlapping (day, start, end, events) {
+    let result = false;
 
-    return events.some(function(event) {
-      var eventStart = moment(event.start);
-      var eventEnd = event.end ? moment(event.end) : eventStart;
-
-      // Overlap condition: start < existing end && end > existing start
-      return newStart.isBefore(eventEnd) && newEnd.isAfter(eventStart);
-    });
-  }
+    for (const exevent of events) {
+        const eventDay = exevent.startStr.split('T')[0];
+        if (eventDay === day) {
+            // new start time is greater than start time and lower than end time of the existing event
+            if (start.split('T')[1] > exevent.startStr.split('T')[1] && start.split('T')[1] < exevent.endStr.split('T')[1]  ) {
+                result = true;
+                break;
+            }
+            // new end time is greater than start time and lower than end time of the existing event
+            if (end.split('T')[1] > exevent.startStr.split('T')[1] && end.split('T')[1] < exevent.endStr.split('T')[1]  ) {
+                result = true;
+                break;
+            }
+            // new start time is lower than start time and end time greater than end time of the existing event
+            if (start.split('T')[1] < exevent.startStr.split('T')[1] && end.split('T')[1] > exevent.endStr.split('T')[1]  ) {
+                result = true;
+                break;
+            }
+        }
+    }
+    return result;
+}
