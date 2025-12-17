@@ -19,6 +19,7 @@ const MODE = {
 
 const wdays = ['So', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 let seriesmap = new Map();
+let revmap    = new Map();
 
 window.onload = async () => {
     let groupIdParts = null;
@@ -57,6 +58,7 @@ window.onload = async () => {
     processingMode=MODE.VIEW;
 
     // get publich holidays
+    
     const currentYear = new Date().getFullYear();
     const pholidays = await getpublicHolidays(startyear, endyear); 
     
@@ -73,9 +75,11 @@ window.onload = async () => {
         calendar.addEvent(pholidays.publicholidays[i]);
     }
         
+        
     // get events from the database
     dbevents = await getEventsfromDB();
-
+    let revent={};
+    
     for (let i = 0; i < dbevents.events.length; i++) {
         if (User.user.id === dbevents.events[i].userid || User.user.name === 'Administrator' ) {
             dbevents.events[i].eventTextColor = '#000000';
@@ -86,6 +90,13 @@ window.onload = async () => {
                     groupNo = groupIdParts[1]; 
                 }
                 calendar.addEvent(dbevents.events[i]);
+                revent.start=dbevents.events[i].start;
+                revent.end=dbevents.events[i].end;
+                let rinterval = dbevents.events[i].rrule.interval;
+                let runtil = dbevents.events[i].rrule.until;
+                fillrevmap(revent, rinterval, runtil);
+                //revmap.set("2025-12-01", revent);
+                
             } else {
                 calendar.addEvent({
                     title:  dbevents.events[i].title,
@@ -122,8 +133,7 @@ window.onload = async () => {
         }
     }
 
-    let bbsevents = calendar.getEvents();
-
+    
     // buttons of modal dialog
     const cancel_btn = document.getElementById("cancelButton");
     cancel_btn.addEventListener("click", event => {
@@ -142,6 +152,9 @@ window.onload = async () => {
     delete_btn.addEventListener("click", event => {
         deleteEvent(event);     
     });
+
+    // find overlappings after events were created
+    postCheckOverlapping();
 
 }
 
@@ -238,6 +251,14 @@ document.addEventListener('DOMContentLoaded', async function() {
                 openModalDialog(arg);
             }
           },
+          /*
+          eventContent: function (info) {
+            const event = info.event;
+
+            if (event.allDay === false) {
+                console.log("Event: " + event.title + " " + event.startStr)
+            }
+          },*/
         editable: false,
         dayMaxEvents: true, // allow "more" link when too many events
     });
@@ -420,13 +441,7 @@ async function submitEvent(event) {
         alert('❌ Überschneidung mit vorhandener Reservierung');
         return false;
     }
-    /*
-    if (isOverlapping(eventstart, eventend, calendar.getEvents())) {
-        alert('❌ This time overlaps with an existing event.');
-    }
-    */
     
-
     const series = document.getElementById("seriesSelect").value.split('_');
 
     const series_freq = series[0];
@@ -435,7 +450,13 @@ async function submitEvent(event) {
     const date = new Date(eventstart);
     const day = date.getDay();
     const lastdayofYear = new Date(new Date().getFullYear(), 11, 31);
-    const untilday = lastdayofYear.toISOString().split("T");
+
+    //const untilday = lastdayofYear.toISOString().split("T");
+
+    const lyear = lastdayofYear.getFullYear();
+    const lmonth = String(lastdayofYear.getMonth() + 1).padStart(2, '0');
+    const lday = String(lastdayofYear.getDate()).padStart(2, '0');
+    let untilday = lyear + "-" + lmonth + "-" + lday;
     
 
     try {
@@ -451,7 +472,7 @@ async function submitEvent(event) {
                     console.log("Serie: " + series + " " + wdays[day]);
                     
                     interval = series_interval;
-                    until = untilday[0];    //'2025-12-31';
+                    until = untilday;    //'2025-12-31';
                     freq = 'weekly';
                     duration = getduration(eventstart, eventend);
                     const daytime = eventstart.split("T");
@@ -780,6 +801,41 @@ function getEvIndex(evgroupid) {
     }
     return result;
 }
+
+function postCheckOverlapping () {
+    let bbsevents = [];
+    bbsevents = calendar.getEvents();
+
+    for (let i = 0; i < bbsevents.length; i++) {
+        if (bbsevents[i].allDay === false) {
+            console.log("Event: [" + i + "] " + bbsevents[i].startStr + " " + bbsevents[i].title)
+        }
+    }
+}
+
+function fillrevmap(revent, interval, until) {
+    let findex = revent.start.split('T')[0];
+    revmap.set(findex, revent);
+    let startdate = new Date(findex);
+    let currentyear = startdate.getFullYear();
+    let untilDate = new Date(until);
+
+    while (startdate < untilDate) {
+        startdate.setDate(startdate.getDate() + interval * 7);
+        const year = startdate.getFullYear();
+        if (year === currentyear) {
+            if (startdate.getTime() != untilDate.getTime()) {
+                const month = String(startdate.getMonth() + 1).padStart(2, '0');
+                const day = String(startdate.getDate()).padStart(2, '0');
+                let nindex = year + "-" + month + "-" + day;
+                revmap.set(nindex, revent);
+            }
+        }
+    }
+
+}
+
+
 
 function checkDayOverlapping (day, start, end, events) {
     let result = false;
