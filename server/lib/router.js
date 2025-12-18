@@ -798,7 +798,7 @@ function sendEMailtoAdmin(action, title, start, end, series, interval) {
         html: htmlText
     }
     
-    sendMail(transporter, mailOptions);
+    //sendMail(transporter, mailOptions);
 
 };
 

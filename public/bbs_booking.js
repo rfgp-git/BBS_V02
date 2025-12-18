@@ -814,8 +814,20 @@ function postCheckOverlapping () {
 }
 
 function fillrevmap(revent, interval, until) {
+    let reventarr = [];
+    let rtime = {};
     let findex = revent.start.split('T')[0];
-    revmap.set(findex, revent);
+    
+    rtime.start = revent.start.split('T')[1];
+    rtime.end = revent.end.split('T')[1];
+    reventarr.push(rtime);
+
+    revmap.set(findex, reventarr);
+
+
+    console.log("start: ", revmap.get(findex)[0].start);
+    console.log("end: ", revmap.get(findex)[0].end);
+
     let startdate = new Date(findex);
     let currentyear = startdate.getFullYear();
     let untilDate = new Date(until);
@@ -828,7 +840,25 @@ function fillrevmap(revent, interval, until) {
                 const month = String(startdate.getMonth() + 1).padStart(2, '0');
                 const day = String(startdate.getDate()).padStart(2, '0');
                 let nindex = year + "-" + month + "-" + day;
-                revmap.set(nindex, revent);
+                if (revmap.has(nindex)) {
+                    let extendtimearr=[];
+                    let timerange=[];
+                    timerange = revmap.get(nindex);
+                    //extendtimearr.push(timerange); 
+                    Object.assign(extendtimearr,timerange);
+                    extendtimearr.push(rtime);
+                    //const array = Array.from(revmap);
+                    //console.log(array);
+                    //reventarr.push(revmap.get)
+                    revmap.set(nindex, extendtimearr);
+                    console.log("Length: ", revmap.get(nindex).length);
+                    for (let i = 0; i < revmap.get(nindex).length; i++) {
+                        console.log("start: ", revmap.get(nindex)[i].start);
+                        console.log("end: ", revmap.get(nindex)[i].end);
+                    }
+                } else {
+                    revmap.set(nindex, reventarr);
+                } 
             }
         }
     }
