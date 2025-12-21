@@ -10,6 +10,8 @@ let exEventIndex = -1;
 let dbevents = [];
 let groupId = null;
 let groupNo = null;
+let errorText = "";
+let closedDays=0;
 
 const MODE = {
     VIEW: 1,
@@ -19,7 +21,8 @@ const MODE = {
 
 const wdays = ['So', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 let seriesmap = new Map();
-let revmap    = new Map();
+// map with all not blocked events like public holidays or closed days
+let eventsmap = new Map();
 
 window.onload = async () => {
     let groupIdParts = null;
@@ -57,11 +60,13 @@ window.onload = async () => {
 
     processingMode=MODE.VIEW;
 
-    // get publich holidays
+    // get public holidays and closed days
     
     const currentYear = new Date().getFullYear();
     const pholidays = await getpublicHolidays(startyear, endyear); 
     
+    closedDays = pholidays.publicholidays.length;
+
     for (let i = 0; i < pholidays.publicholidays.length; i++) {
         pholidays.publicholidays[i].overlap   = false,
         pholidays.publicholidays[i].editable  = false,
@@ -90,13 +95,6 @@ window.onload = async () => {
                     groupNo = groupIdParts[1]; 
                 }
                 calendar.addEvent(dbevents.events[i]);
-                revent.start=dbevents.events[i].start;
-                revent.end=dbevents.events[i].end;
-                let rinterval = dbevents.events[i].rrule.interval;
-                let runtil = dbevents.events[i].rrule.until;
-                fillrevmap(revent, rinterval, runtil);
-                //revmap.set("2025-12-01", revent);
-                
             } else {
                 calendar.addEvent({
                     title:  dbevents.events[i].title,
@@ -131,8 +129,16 @@ window.onload = async () => {
                 });
             }
         }
+        /*
+        revent.title=dbevents.events[i].title;
+        revent.start=dbevents.events[i].start;
+        revent.end=dbevents.events[i].end;
+        let rinterval = dbevents.events[i].rrule.interval;
+        let runtil = dbevents.events[i].rrule.until;
+        */
+        filleventsmap(dbevents.events[i]);
+        //eventsmap.set("2025-12-01", revent);
     }
-
     
     // buttons of modal dialog
     const cancel_btn = document.getElementById("cancelButton");
@@ -251,14 +257,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 openModalDialog(arg);
             }
           },
-          /*
-          eventContent: function (info) {
-            const event = info.event;
-
-            if (event.allDay === false) {
-                console.log("Event: " + event.title + " " + event.startStr)
-            }
-          },*/
+          
         editable: false,
         dayMaxEvents: true, // allow "more" link when too many events
     });
@@ -384,8 +383,7 @@ async function deleteEvent(event) {
                                                     dbevents.events[exEventIndex].duration,
                                                     existingEvent.event.startStr
                                                 );
-            // reload page
-            location.reload();
+            
         }
         
         if (choice == 'S') {
@@ -404,6 +402,8 @@ async function deleteEvent(event) {
     }
         
     closeModalDialog();
+    // reload page
+    location.reload();
 }
 
 async function submitEvent(event) {
@@ -437,11 +437,6 @@ async function submitEvent(event) {
         return;
     }
 
-    if (checkDayOverlapping(eventday, eventstart, eventend, calendar.getEvents())) {
-        alert('❌ Überschneidung mit vorhandener Reservierung');
-        return false;
-    }
-    
     const series = document.getElementById("seriesSelect").value.split('_');
 
     const series_freq = series[0];
@@ -465,6 +460,14 @@ async function submitEvent(event) {
             switch (series_freq) {
                 case "once":
                     console.log("Serie: " + series + " " + wdays[day]);
+                    errorText="";
+                    if (eventsmap.has(eventday)) {
+                        if (checkTimeOverlapping(eventday, eventstart, eventend)) {
+                            alert('❌ Überschneidung am ' + eventday + "\n" + title + "\n" + eventstart.split('T')[1] + " - " + eventend.split('T')[1]
+                                + "\n" + errorText);
+                            return false;
+                        }
+                    }
                     dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, null, freq, interval, wday, until, dtstart, duration, exdate);
                     return dbeventid;
                 break;
@@ -497,6 +500,10 @@ async function submitEvent(event) {
 
                     }
                     console.log("GROUPID: ", groupId);
+
+                    if (checkSeriesConflict(title, eventstart, eventend, interval, until)) {
+                        return false;
+                    }
                     
                     dbeventid= await saveEventtoDB(User.user.id, title, eventstart, eventend, groupId, freq, interval, wdays[day], dtstart, until, duration, exdate);
                     return dbeventid;
@@ -512,14 +519,25 @@ async function submitEvent(event) {
 
             switch (series_freq) {
                 case "once":
-                    
+                    errorText="";
+                    if (eventsmap.has(eventday)) {
+                        if (checkTimeOverlapping(eventday, eventstart, eventend)) {
+                            alert('❌ Überschneidung am ' + eventday + "\n" + title + "\n" + eventstart.split('T')[1] + " - " + eventend.split('T')[1]
+                            + "\n" + errorText);
+                            return false;
+                        }
+                    }
                 break;
                 case "weekly":
                     freq = 'weekly';
                     interval = series_interval;
+                    until = untilday;
                     duration = getduration(eventstart, eventend);
                     wday    = wdays[day];
                     dtstart = eventstart;
+                    if (checkSeriesConflict(title, eventstart, eventend, interval, until)) {
+                        return false;
+                    }
                 break;
                 default:
                     console.log("Unbekannte Serie !");
@@ -813,82 +831,161 @@ function postCheckOverlapping () {
     }
 }
 
-function fillrevmap(revent, interval, until) {
-    let reventarr = [];
-    let rtime = {};
-    let findex = revent.start.split('T')[0];
+function filleventsmap(event) {
+    let eventarr = [];
+    let eventdetail = {};
+
+    let eventday = event.start.split('T')[0];
     
-    rtime.start = revent.start.split('T')[1];
-    rtime.end = revent.end.split('T')[1];
-    reventarr.push(rtime);
+    eventdetail.title = event.title;
+    eventdetail.start = event.start.split('T')[1];
+    eventdetail.end = event.end.split('T')[1];
+    eventarr.push(eventdetail);
 
-    revmap.set(findex, reventarr);
+    // handle single event
+    if (eventsmap.has(eventday)) {
+        addMultiEvent(eventday, eventdetail);
+    } else {
+        eventsmap.set(eventday, eventarr);
+    }
+    
+    if (event.groupId === null ) {
+        return;
+    }
 
+    // handle event series
+    let interval = event.rrule.interval;
+    let until    = event.rrule.until;
 
-    console.log("start: ", revmap.get(findex)[0].start);
-    console.log("end: ", revmap.get(findex)[0].end);
-
-    let startdate = new Date(findex);
+    let startdate = new Date(eventday);
     let currentyear = startdate.getFullYear();
     let untilDate = new Date(until);
 
     while (startdate < untilDate) {
+        // determine dates of the weekly recurring events
         startdate.setDate(startdate.getDate() + interval * 7);
         const year = startdate.getFullYear();
         if (year === currentyear) {
             if (startdate.getTime() != untilDate.getTime()) {
                 const month = String(startdate.getMonth() + 1).padStart(2, '0');
                 const day = String(startdate.getDate()).padStart(2, '0');
-                let nindex = year + "-" + month + "-" + day;
-                if (revmap.has(nindex)) {
-                    let extendtimearr=[];
-                    let timerange=[];
-                    timerange = revmap.get(nindex);
-                    //extendtimearr.push(timerange); 
-                    Object.assign(extendtimearr,timerange);
-                    extendtimearr.push(rtime);
-                    //const array = Array.from(revmap);
-                    //console.log(array);
-                    //reventarr.push(revmap.get)
-                    revmap.set(nindex, extendtimearr);
-                    console.log("Length: ", revmap.get(nindex).length);
-                    for (let i = 0; i < revmap.get(nindex).length; i++) {
-                        console.log("start: ", revmap.get(nindex)[i].start);
-                        console.log("end: ", revmap.get(nindex)[i].end);
-                    }
+                let eventday = year + "-" + month + "-" + day;
+                if (eventsmap.has(eventday)) {
+                    addMultiEvent(eventday, eventdetail);
                 } else {
-                    revmap.set(nindex, reventarr);
+                    eventsmap.set(eventday, eventarr);
                 } 
+            }
+        }
+    }
+    
+    // remove deleted series-event from map
+    let exday="";
+    let extime="";
+    
+    if (event.exdate.length > closedDays) {
+        for (let i = closedDays; i < event.exdate.length; i++) {
+            exday=event.exdate[i].split('T')[0]; 
+            extime=event.exdate[i].split('T')[1]; 
+            if (eventsmap.has(exday)) {
+                removeEvent(exday, extime);  
             }
         }
     }
 
 }
 
+function addMultiEvent(evday, evdetail) {
 
+    let extendtimearr=[];
+    let timerange=[];
+    
+    timerange = eventsmap.get(evday);
+    //copy all properties to the new array 
+    Object.assign(extendtimearr,timerange);
+    extendtimearr.push(evdetail);
+    
+    eventsmap.set(evday, extendtimearr);
+}
 
-function checkDayOverlapping (day, start, end, events) {
+function removeEvent(evday, evtime) {
+
+    let extendtimearr=[];
+    let timerange=[];
+    
+    timerange = eventsmap.get(evday);
+    //copy all properties to the new array 
+    Object.assign(extendtimearr,timerange);
+
+    for (let i = 0; i < extendtimearr.length; i++) {
+        if (extendtimearr[i].start === evtime) {
+            const removed = extendtimearr.splice(i, 1);
+            console.log("removed: ", removed)
+        }
+    }
+    
+    eventsmap.set(evday, extendtimearr);
+}
+
+function checkSeriesConflict(stitle, sstart, send, sinterval, suntil) {
+    
     let result = false;
+    let startdate = new Date(sstart.split('T')[0]);
+    let currentyear = startdate.getFullYear();
+    let untilDate = new Date(suntil);
 
-    for (const exevent of events) {
-        const eventDay = exevent.startStr.split('T')[0];
-        if (eventDay === day) {
-            // new start time is greater than start time and lower than end time of the existing event
-            if (start.split('T')[1] > exevent.startStr.split('T')[1] && start.split('T')[1] < exevent.endStr.split('T')[1]  ) {
-                result = true;
-                break;
-            }
-            // new end time is greater than start time and lower than end time of the existing event
-            if (end.split('T')[1] > exevent.startStr.split('T')[1] && end.split('T')[1] < exevent.endStr.split('T')[1]  ) {
-                result = true;
-                break;
-            }
-            // new start time is lower than start time and end time greater than end time of the existing event
-            if (start.split('T')[1] < exevent.startStr.split('T')[1] && end.split('T')[1] > exevent.endStr.split('T')[1]  ) {
-                result = true;
-                break;
+    errorText="";
+
+    while (startdate < untilDate) {
+        const year = startdate.getFullYear();
+        if (year === currentyear) {
+            if (startdate.getTime() != untilDate.getTime()) {
+                const month = String(startdate.getMonth() + 1).padStart(2, '0');
+                const day = String(startdate.getDate()).padStart(2, '0');
+                let eventday = year + "-" + month + "-" + day;
+                if (eventsmap.has(eventday)) {
+                  if (checkTimeOverlapping(eventday, sstart, send)) {
+                            alert('❌ Überschneidung am ' + eventday + "\n" + stitle + "\n" + sstart.split('T')[1] + " - " + send.split('T')[1]
+                                + "\n" + errorText);
+                            result= true;
+                            break;
+                    }  
+                } 
+                startdate.setDate(startdate.getDate() + sinterval * 7);
             }
         }
     }
+    return result;
+
+}
+
+
+function checkTimeOverlapping (day, start, end) {
+    let result = false;
+
+    for (let i = 0; i < eventsmap.get(day).length; i++) {
+        console.log("start: ", eventsmap.get(day)[i].start);
+        console.log("end: ", eventsmap.get(day)[i].end);
+
+        // new start time is greater than start time and lower than end time of the existing event
+        if (start.split('T')[1] >= eventsmap.get(day)[i].start && start.split('T')[1] <= eventsmap.get(day)[i].end) {
+            errorText = "Konflikt mit " + eventsmap.get(day)[i].title + "\n" + eventsmap.get(day)[i].start + " - " + eventsmap.get(day)[i].end;
+            result = true;
+            break;
+        }
+        // new end time is greater than start time and lower than end time of the existing event
+        if (end.split('T')[1] > eventsmap.get(day)[i].start && end.split('T')[1] < eventsmap.get(day)[i].end) {
+            errorText = "Konflikt mit " + eventsmap.get(day)[i].title + "\n" + eventsmap.get(day)[i].start + " - " + eventsmap.get(day)[i].end;
+            result = true;
+            break;
+        }
+        // new start time is lower than start time and end time greater than end time of the existing event
+        if (start.split('T')[1] < eventsmap.get(day)[i].start && end.split('T')[1] > eventsmap.get(day)[i].end) {
+            errorText = "Konflikt mit " + eventsmap.get(day)[i].title + "\n" + eventsmap.get(day)[i].start + " - " + eventsmap.get(day)[i].end;
+            result = true;
+            break;
+        }
+    }
+        
     return result;
 }
