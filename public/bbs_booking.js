@@ -416,6 +416,7 @@ async function submitEvent(event) {
     let dbeventid   = null;
     let wday        = null;
     let dtstart     = null;
+    let eventid     = null;
 
     const form=document.getElementById("eventModal");
     if (!form.checkValidity()) {
@@ -425,12 +426,15 @@ async function submitEvent(event) {
         
     console.log("Bezeichnung: ", document.getElementById("eventTitle").value);
 
-    const title = User.user.name + ": " + document.getElementById("eventTitle").value;
-    const eventday = document.getElementById("eventDate").value;
+    if (existingEvent.event !== undefined) {
+        eventid    = existingEvent.event._def.extendedProps._id;
+    }
+    let title      = User.user.name + ": " + document.getElementById("eventTitle").value;
+    const eventday   = document.getElementById("eventDate").value;
     const eventstart = document.getElementById("eventDate").value + "T" + document.getElementById("eventStart").value;
-    const eventend = document.getElementById("eventDate").value + "T" + document.getElementById("eventEnd").value;
-    const startTime = new Date(eventstart);
-    const endTime = new Date(eventend);
+    const eventend   = document.getElementById("eventDate").value + "T" + document.getElementById("eventEnd").value;
+    const startTime  = new Date(eventstart);
+    const endTime    = new Date(eventend);
 
     if (endTime <= startTime) {
         alert("Die Ende-Zeit muss größer als die Start-Zeit sein!");
@@ -462,7 +466,7 @@ async function submitEvent(event) {
                     console.log("Serie: " + series + " " + wdays[day]);
                     errorText="";
                     if (eventsmap.has(eventday)) {
-                        if (checkTimeOverlapping(eventday, eventstart, eventend)) {
+                        if (checkTimeOverlapping(eventid, eventday, eventstart, eventend)) {
                             alert('❌ Überschneidung am ' + eventday + "\n" + title + "\n" + eventstart.split('T')[1] + " - " + eventend.split('T')[1]
                                 + "\n" + errorText);
                             return false;
@@ -521,7 +525,7 @@ async function submitEvent(event) {
                 case "once":
                     errorText="";
                     if (eventsmap.has(eventday)) {
-                        if (checkTimeOverlapping(eventday, eventstart, eventend)) {
+                        if (checkTimeOverlapping(eventid, eventday, eventstart, eventend)) {
                             alert('❌ Überschneidung am ' + eventday + "\n" + title + "\n" + eventstart.split('T')[1] + " - " + eventend.split('T')[1]
                             + "\n" + errorText);
                             return false;
@@ -535,6 +539,7 @@ async function submitEvent(event) {
                     duration = getduration(eventstart, eventend);
                     wday    = wdays[day];
                     dtstart = eventstart;
+                    title = existingEvent.event._def.title;
                     if (checkSeriesConflict(title, eventstart, eventend, interval, until)) {
                         return false;
                     }
@@ -542,6 +547,8 @@ async function submitEvent(event) {
                 default:
                     console.log("Unbekannte Serie !");
             }
+
+            title = existingEvent.event._def.title;
             
             dbeventid= await updateEventinDB(existingEvent.event._def.extendedProps._id, title, eventstart, eventend, freq, interval, wday, duration, exdate);
         }
@@ -811,7 +818,7 @@ function getduration(datestart, datend) {
 function getEvIndex(evgroupid) {
     let result = -1;
     for (let i = 0; i < dbevents.events.length; i++) {
-        if (User.user.id === dbevents.events[i].userid ) {
+        if (User.user.id === dbevents.events[i].userid || User.user.name === 'Administrator') {
             if (evgroupid === dbevents.events[i].groupId) {
                 result = i;
             }
@@ -837,6 +844,7 @@ function filleventsmap(event) {
 
     let eventday = event.start.split('T')[0];
     
+    eventdetail._id = event._id;
     eventdetail.title = event.title;
     eventdetail.start = event.start.split('T')[1];
     eventdetail.end = event.end.split('T')[1];
@@ -928,11 +936,16 @@ function removeEvent(evday, evtime) {
 }
 
 function checkSeriesConflict(stitle, sstart, send, sinterval, suntil) {
-    
-    let result = false;
-    let startdate = new Date(sstart.split('T')[0]);
+    let eventid = null;
+
+    if (existingEvent.event !== undefined) {
+        eventid    = existingEvent.event._def.extendedProps._id;
+    }
+     
+    let result      = false;
+    let startdate   = new Date(sstart.split('T')[0]);
     let currentyear = startdate.getFullYear();
-    let untilDate = new Date(suntil);
+    let untilDate   = new Date(suntil);
 
     errorText="";
 
@@ -944,7 +957,7 @@ function checkSeriesConflict(stitle, sstart, send, sinterval, suntil) {
                 const day = String(startdate.getDate()).padStart(2, '0');
                 let eventday = year + "-" + month + "-" + day;
                 if (eventsmap.has(eventday)) {
-                  if (checkTimeOverlapping(eventday, sstart, send)) {
+                  if (checkTimeOverlapping(eventid, eventday, sstart, send)) {
                             alert('❌ Überschneidung am ' + eventday + "\n" + stitle + "\n" + sstart.split('T')[1] + " - " + send.split('T')[1]
                                 + "\n" + errorText);
                             result= true;
@@ -960,12 +973,20 @@ function checkSeriesConflict(stitle, sstart, send, sinterval, suntil) {
 }
 
 
-function checkTimeOverlapping (day, start, end) {
+function checkTimeOverlapping (eventid, day, start, end) {
     let result = false;
 
     for (let i = 0; i < eventsmap.get(day).length; i++) {
+        console.log("title: ", eventsmap.get(day)[i].title);
         console.log("start: ", eventsmap.get(day)[i].start);
         console.log("end: ", eventsmap.get(day)[i].end);
+
+        if (eventid !== null) {
+            if (eventsmap.get(day)[i]._id === eventid) {
+                // avoid conflict with oneself
+                continue;
+            }
+        }
 
         // new start time is greater than start time and lower than end time of the existing event
         if (start.split('T')[1] >= eventsmap.get(day)[i].start && start.split('T')[1] <= eventsmap.get(day)[i].end) {
