@@ -96,7 +96,23 @@
 
         let tbl_body = document.getElementById('drink_table_body');
 
-        let inputno="<input type=" + '"' + "number" + '"' + "min=" + '"' + "0" + '"' + "max=" + '"' + "20" + '"' + "value=" + '"' + "0" + '"' + "onchange=" + "calculate_total(this)" + ">"
+        //let inputno="<input type=" + '"' + "number" + '"' + "min=" + '"' + "0" + '"' + "max=" + '"' + "20" + '"' + "value=" + '"' + "0" + '"' + "onchange=" + "calculate_total(this)" + ">"
+
+        
+        let inputno="<select name=" + "\"quantity\" " + "id=" +"\"cb_quantity\" " +  "onchange=" + "\"calculate_total(this)\">" +
+                        "<option value=" + "0>" + 0 + "</option>" +
+                        "<option value=" + "1>" + 1 + "</option>" +
+                        "<option value=" + "2>" + 2 + "</option>" +
+                        "<option value=" + "3>" + 3 + "</option>" +
+                        "<option value=" + "4>" + 4 + "</option>" +
+                        "<option value=" + "5>" + 5 + "</option>" +
+                        "<option value=" + "6>" + 6 + "</option>" +
+                        "<option value=" + "7>" + 7 + "</option>" +
+                        "<option value=" + "8>" + 8 + "</option>" +
+                        "<option value=" + "9>" + 9 + "</option>" +
+                        "<option value=" + "10>" + 10 + "</option>" +
+                    "</select>"
+        
             
         for (let i = 0; i < drink_array.length; i++) {
 
@@ -107,7 +123,7 @@
                                 "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + '0,00' + "</td>" +
                         "</tr>";
  
-                tbl_body.innerHTML += row;      
+                tbl_body.innerHTML += row;
         }
         // Add total row
                 let row = "<tr>" +
@@ -131,7 +147,11 @@
 
         let tbl_body = document.getElementById('charges_table_body');
 
-        let inputno="<input type=" + '"' + "number" + '"' + "min=" + '"' + "0" + '"' + "max=" + '"' + "20" + '"' + "value=" + '"' + "0" + '"' + "onchange=" + "calculate_total(this)" + ">"
+        //let inputno="<input type=" + '"' + "number" + '"' + "min=" + '"' + "0" + '"' + "max=" + '"' + "20" + '"' + "value=" + '"' + "0" + '"' + "onchange=" + "calculate_total(this)" + ">"
+        let inputno="<select name=" + "\"charges\" " + "id=" +"\"cb_charges\" " +  "onchange=" + "\"calculate_total(this)\">" +
+                        "<option value=" + "0>" + 0 + "</option>" +
+                        "<option value=" + "1>" + 1 + "</option>" +
+                    "</select>"
             
         for (let i = 0; i < charge_array.length; i++) {
 
