@@ -465,6 +465,13 @@ async function submitEvent(event) {
                 case "once":
                     console.log("Serie: " + series + " " + wdays[day]);
                     errorText="";
+                    // check if the selected day is a holiday
+                    for (let i = 0; i < aholidays.length; i++) {
+                        if (eventday === aholidays[i] ) {
+                            alert('❌ am ' + eventday + ' ist die Kegelbahn nicht verfügbar');    
+                            return false;
+                        }
+                    }
                     if (eventsmap.has(eventday)) {
                         if (checkTimeOverlapping(eventid, eventday, eventstart, eventend)) {
                             alert('❌ Überschneidung am ' + eventday + "\n" + title + "\n" + eventstart.split('T')[1] + " - " + eventend.split('T')[1]
@@ -487,7 +494,6 @@ async function submitEvent(event) {
                     for (let i = 0; i < aholidays.length; i++) {
                         exdate [i] = aholidays[i] + "T" + daytime[1];
                     }
-                    
                     
                     wday    = wdays[day];
                     dtstart = eventstart;
