@@ -140,6 +140,23 @@ window.onload = async () => {
         //eventsmap.set("2025-12-01", revent);
     }
     
+    // date picker check for sunday
+
+    const datePicker = document.getElementById('eventDate');
+
+    datePicker.addEventListener('input', function () {
+        const selectedDate = new Date(this.value);
+        // getDay() returns 0 for Sunday
+        if (selectedDate.getDay() === 0) {
+            alert("Sonntage sind nicht erlaubt. Bitte ein anderes Datum wählen.");
+            let today = new Date();
+            this.value = today.getFullYear() + "-" + (today.getMonth() + 1).toString().padStart(2,"0") + "-" + today.getDate().toString().padStart(2,"0"); // reset to today
+            //this.classList.add('invalid');
+        } else {
+            //this.classList.remove('invalid');
+        }
+    });
+
     // buttons of modal dialog
     const cancel_btn = document.getElementById("cancelButton");
     cancel_btn.addEventListener("click", event => {
