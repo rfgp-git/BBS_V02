@@ -110,9 +110,10 @@ h2 {
     margin-top: 20px;
     text-align:center;
     font-size: 22px;
-    font-weight: bold;
+    /*font-weight: bold;*/
     /*color: rgb(119,34,60);*/
-    color: rgb(220,96,53);
+    /*color: rgb(220,96,53);*/
+    color: rgb(255, 255, 255);
 }
 
 .info p {
