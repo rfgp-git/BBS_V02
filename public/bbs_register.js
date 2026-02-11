@@ -25,7 +25,7 @@ regformdiv.addEventListener('submit', async(event) => {
     const phonePattern = /^(\+49|0)[1-9][0-9\s\-()]{7,14}$/;
     if (!phonePattern.test(phone)) {
       event.preventDefault();
-      errMsgDiv.innerHTML = 'Bitt eine deutsche Telefon Nummer eingeben !';
+      errMsgDiv.innerHTML = 'Bitt eine Telefon Nummer beginnend mit +49 oder 0 und keine Trennzeichen eingeben !';
       return;
     }
 

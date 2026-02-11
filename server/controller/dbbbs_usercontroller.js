@@ -31,6 +31,7 @@ let _ = class DBUserController {
     }
     
     async dbcreateUser(data) {
+        let existingUser = "";
         try {
             let user= new dbbbsuser({
                 username:   data.username,
@@ -41,7 +42,8 @@ let _ = class DBUserController {
                 role:       data.role
             });
 
-            const existingUser = await dbbbsuser.findOne({
+            
+            existingUser = await dbbbsuser.findOne({
                 $or: [{ username: user.username }, { email: user.email }],
             });
 
