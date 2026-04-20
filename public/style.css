@@ -164,6 +164,11 @@ h2 {
     width: 120px;
 }
 
+.UserIDColumn {
+    display: none;
+    
+}
+
 #page_help {
     padding: 10px;
     overflow: scroll; 

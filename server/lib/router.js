@@ -256,7 +256,15 @@ _.post('/updateUser',  async (req,res) => {
         let userID = req.body.UUser.ID;
         let userName = req.body.UUser.name;
 
-        const result= await DB.updateUser(req.body.UUser.ID, req.body.UUser.name, req.body.UUser.contact, req.body.UUser.phone, req.body.UUser.email, req.body.UUser.passwd);
+        let user = new User();
+        user.setUserName(req.body.UUser.name);
+        user.setContactPerson(req.body.UUser.contact);
+        user.setPhoneNo(req.body.UUser.phone);
+        user.setEMail(req.body.UUser.email);
+        
+        let passwdresult = await user.setPassword(req.body.UUser.passwd);
+
+        const result= await DB.updateUser(userID, userName, user.contact, user.phone, user.email, user.password);
         if (result) { 
             res.status(200).json({
             timestamp: Date.now(),
@@ -273,7 +281,7 @@ _.post('/updateUser',  async (req,res) => {
                 code: 404
             });
         }
-        
+
     } catch(e) {
         throw new Error(e);
     }

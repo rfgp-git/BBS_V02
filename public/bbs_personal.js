@@ -139,18 +139,29 @@ async function create_usercontact_table_data() {
 
     let tbl_body = document.getElementById('usercontact_table_body');
 
+    let resetpassword="<input type=" + '"' + "button" + '"' + " onclick=" + '"' + "onResetPassword(this)" + '"' + " value=" + '"' + "Reset" + '"' + ">"
+
     usercontact_data= await getallUsers();
     
     for (let i=0; i < usercontact_data.length; i++)
     {
         let row = "<tr>" +
+                            "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + usercontact_data[i]._id + "</td>" +
                             "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + usercontact_data[i].username + "</td>" +
                             "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + usercontact_data[i].contact + "</td>" +
                             "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + usercontact_data[i].phone + "</td>" +
                             "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + usercontact_data[i].email + "</td>" +
+                            "<td " + "class=" + "mdl-data-table__cell--non-numeric" +">" + resetpassword + "</td>" +
                     "</tr>";
     
         tbl_body.innerHTML += row;
+    }
+    // hide column with user ids
+    const table = document.getElementById("usercontact_table");
+    for (let row of table.rows) {
+      if (row.cells[0]) {
+        row.cells[0].style.display = "none";
+      }
     }
 }
 
@@ -260,7 +271,13 @@ async function btn_close_clicked() {
 }
 
 async function btn_updatepsd_clicked() {
-    updatePersonalData();
+
+    updatePersonalData( User.user.id,
+                        document.getElementById("username").value,
+                        document.getElementById("contactperson").value,
+                        document.getElementById("phone").value,
+                        document.getElementById("email").value,
+                        document.getElementById("password").value);
 }
 
 async function triggerInvoice(payment) {
@@ -392,10 +409,20 @@ async function updateInvoice(inv_no, inv_payment, inv_status) {
 }
 
 
-async function updatePersonalData() {
+async function updatePersonalData(userid, username, contact, phone, email, password) {
     
     let UUser = {};
     
+    UUser= {
+                    "ID":       userid,
+                    "name":     username,
+                    "contact":  contact,
+                    "phone":    phone,
+                    "email":    email,
+                    "passwd":   password
+            }
+    
+    /*
     UUser= {
                     "ID":       User.user.id,
                     "name":     document.getElementById("username").value,
@@ -404,7 +431,7 @@ async function updatePersonalData() {
                     "email":    document.getElementById("email").value,
                     "passwd":   document.getElementById("password").value,
             }
-
+    */
     
     try {
         const response = await fetch('api/updateUser', {
@@ -480,5 +507,33 @@ function ondisableButtons() {
     button2.disabled = buttonbardisabled;
     button3.disabled = buttonbardisabled;
     
+}
+
+function onResetPassword(button) {
+
+     //get data of user contact table
+    let hTable = document.getElementById('usercontact_table');
+
+     const row = button.closest("tr");
+     const rowIndex = row.rowIndex;
+
+     //gets cells of current row  
+    let hCells = hTable.rows.item(rowIndex).cells;
+    // get cell content
+    let userid = hCells.item(0).innerHTML;
+    let username = hCells.item(1).innerHTML;
+    
+    console.log('Password Reset pressed ' + rowIndex + ' ' + userid + ' ' + username);
+
+    let userConfirmed = confirm("Soll das Password von " + username + " zurückgesetzt werden?");
+
+    if (userConfirmed) {
+        updatePersonalData( hCells.item(0).innerHTML,
+                            hCells.item(1).innerHTML,
+                            hCells.item(2).innerHTML,
+                            hCells.item(3).innerHTML,
+                            hCells.item(4).innerHTML,
+                            '!08154711?');
+    }
 }
 
